@@ -22,6 +22,21 @@ export interface ThemeColors {
 
 export const PRESET_THEMES: ThemeColors[] = [
   {
+    id: 'arkashine-purple',
+    name: 'Arkashine Royal Purple',
+    category: 'Innovation & Science',
+    primary: '#5C26C0',          // RGB(92, 38, 192)
+    primaryDark: '#3E1885',      // Deeper contrast for badges/footer
+    primaryLight: '#7339E0',     // Bright purple
+    accent: '#8B5CF6',          // Vivid violet accent
+    accentHover: '#7C3AED',
+    accentSoft: '#F5F3FF',
+    accentBorder: '#DDD6FE',
+    accentText: '#5C26C0',
+    bgPage: '#F8FAFC',
+    dotColor: '#5C26C0'
+  },
+  {
     id: 'forest-emerald',
     name: 'Forest Emerald',
     category: 'Nature & Agritech',

@@ -2,14 +2,14 @@
 
 @layer base {
   :root {
-    --theme-primary: #143D30;
-    --theme-primary-dark: #0E2C23;
-    --theme-primary-light: #1E5644;
-    --theme-accent: #10B981;
-    --theme-accent-hover: #059669;
-    --theme-accent-soft: #ECFDF5;
-    --theme-accent-border: #A7F3D0;
-    --theme-accent-text: #065F46;
+    --theme-primary: #5C26C0;
+    --theme-primary-dark: #3E1885;
+    --theme-primary-light: #7339E0;
+    --theme-accent: #8B5CF6;
+    --theme-accent-hover: #7C3AED;
+    --theme-accent-soft: #F5F3FF;
+    --theme-accent-border: #DDD6FE;
+    --theme-accent-text: #5C26C0;
     --theme-bg-page: #F8FAFC;
 
     --color-primary: var(--theme-primary);

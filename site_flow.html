@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Arkashine School Innovation Lab - Complete Site Flow & Architecture</title>
+<style>
+  @page {
+    size: A4 portrait;
+    margin: 15mm 15mm 15mm 15mm;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1e293b;
+    line-height: 1.45;
+    background: #ffffff;
+    margin: 0;
+    padding: 0;
+    font-size: 11pt;
+  }
+  .page {
+    page-break-after: always;
+  }
+  .page:last-child {
+    page-break-after: avoid;
+  }
+  .header {
+    border-bottom: 2px solid #143D30;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .header h1 {
+    margin: 0;
+    color: #143D30;
+    font-size: 20pt;
+    font-weight: 800;
+  }
+  .header p {
+    margin: 4px 0 0;
+    color: #475569;
+    font-size: 9.5pt;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+  h2 {
+    color: #0f172a;
+    font-size: 13pt;
+    border-left: 4px solid #10b981;
+    padding-left: 8px;
+    margin: 16px 0 10px;
+  }
+  h3 {
+    color: #1e293b;
+    font-size: 11pt;
+    margin: 12px 0 6px;
+  }
+  p, li {
+    font-size: 9.5pt;
+    color: #334155;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 16px;
+    font-size: 9pt;
+  }
+  th, td {
+    padding: 7px 10px;
+    text-align: left;
+    border: 1px solid #e2e8f0;
+  }
+  th {
+    background: #f8fafc;
+    color: #0f172a;
+    font-weight: 700;
+  }
+  tr:nth-child(even) td {
+    background: #fafafa;
+  }
+  .flow-box {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+  }
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .step-num {
+    background: #143D30;
+    color: white;
+    font-weight: bold;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9pt;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+  .step-content strong {
+    color: #0f172a;
+    display: block;
+    font-size: 9.5pt;
+  }
+  .step-content span {
+    color: #64748b;
+    font-size: 8.5pt;
+  }
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 8pt;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 6px;
+  }
+  .highlight-card {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 10px 0;
+  }
+  .highlight-card strong {
+    color: #166534;
+    font-size: 9.5pt;
+  }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: SYSTEM OVERVIEW & ARCHITECTURE -->
+<div class="page">
+  <div class="header">
+    <div>
+      <h1>Arkashine Innovation Lab</h1>
+      <p>Summer Innovation Program • Complete Site Flow & User Journey Architecture</p>
+    </div>
+    <div>
+      <span class="badge">Official Reference</span>
+    </div>
+  </div>
+
+  <h2>1. Three-Level Operational Hierarchy & Role Flow</h2>
+  <p>The web application uses role-scoped views with zero dead-ends and maximum 2-click reachability:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 20%;">Role</th>
+        <th style="width: 25%;">User Persona</th>
+        <th style="width: 55%;">Primary Screen Navigation & Responsibilities</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>1. Arkashine HQ</strong><br><span style="color:#059669; font-size:8pt;">Super Admin</span></td>
+        <td>Dr. Vivek Saxena<br><span style="color:#64748b; font-size:8pt;">Managing Director</span></td>
+        <td>
+          • <strong>Overview</strong>: 4 KPI cards, school deployment hub, Needs Attention list.<br>
+          • <strong>Schools & Partners</strong>: 18-point Eligibility gating (Eligible / Conditional / Rejected).<br>
+          • <strong>Heat Map</strong>: 28-day program attendance compliance across all schools.<br>
+          • <strong>Impact & ESG</strong>: Environmental (pH, OC, samples), Social (girls 52%), Governance.<br>
+          • <strong>Certificates</strong>: Bulk approval and verification of Soil Partner Certificates.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>2. Enabling Partner</strong><br><span style="color:#0284c7; font-size:8pt;">Implementation</span></td>
+        <td>Dr. Sunita Deshmukh<br><span style="color:#64748b; font-size:8pt;">GreenHorizon AgriEd</span></td>
+        <td>
+          • <strong>Overview</strong>: RAG health scorecard for assigned regional schools.<br>
+          • <strong>My Schools & Lab Setup</strong>: Equipment delivery & SoiLENZ sensor readiness.<br>
+          • <strong>Student Selection</strong>: Funnel (120 Registered → 60 Quiz → 30 Assignment → 18 Cohort).<br>
+          • <strong>Heat Map & Outreach</strong>: Faculty compliance monitoring & farmer campaign tracking.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>3. School Principal</strong><br><span style="color:#d97706; font-size:8pt;">School Head</span></td>
+        <td>Fr. Thomas Matthew<br><span style="color:#64748b; font-size:8pt;">St. Xavier's Senior Sec.</span></td>
+        <td>
+          • <strong>My School</strong>: 4 KPI cards (72h progress, attendance, test count, farmer visits).<br>
+          • <strong>Daily Log & Remarks</strong>: Read-only chronological timeline of faculty submissions.<br>
+          • <strong>Students & Risk</strong>: Highlights at-risk students falling below 80% attendance bar.<br>
+          • <strong>Certificates</strong>: Final school-level endorsement before Arkashine HQ sign-off.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>4. Faculty Coordinator</strong><br><span style="color:#0d9488; font-size:8pt;">Field Teacher</span></td>
+        <td>Dr. Anjali Patil<br><span style="color:#64748b; font-size:8pt;">Science Teacher</span></td>
+        <td>
+          • <strong>Today's Update</strong>: Quick-log engine (&lt;3 min, phone optimized) with auto-draft.<br>
+          • <strong>Students & Attendance</strong>: 1-tap toggle (Present 🟢 → Late 🟡 → Absent 🔴).<br>
+          • <strong>Soil Lab (SoiLENZ)</strong>: Records tests (pH, EC, Organic Carbon, Nitrogen, Phosphorus, Potassium).<br>
+          • <strong>Outreach</strong>: Records village farmer visits and awareness campaigns.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>5. Student Portal</strong><br><span style="color:#7c3aed; font-size:8pt;">Class VIII-XII</span></td>
+        <td>Ananya Sharma<br><span style="color:#64748b; font-size:8pt;">Class X-A, Group 1 Lead</span></td>
+        <td>
+          • <strong>My Soil Journey</strong>: 8-step precision workflow tracker.<br>
+          • <strong>Modules & Quizzes</strong>: Theory (Mod 1) & Practicals (Mod 2, 3, 4).<br>
+          • <strong>Badges & Rewards</strong>: Sampler, Tester, Reporter, Farmer Friend.<br>
+          • <strong>Certificate</strong>: Live certificate preview with QR code verification.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>2. 4 Curriculum Modules (Theory vs. Practical Structure)</h2>
+  <div class="flow-box">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>Module 1: Introduction to Agriculture & Soil Science (Theory 📖 • 18 Hours)</strong>
+        <span>Foundations of soil horizons (O, A, B, C), soil chemistry (pH, EC, CEC), N-P-K nutrient cycles, and regenerative soil carbon sequestration. Assessed via Comprehensive Theory Quiz.</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>Module 2: Soil Sample Collection & Preparation (Practical 🧪 • 18 Hours)</strong>
+        <span>Hands-on field sampling: zig-zag auger extraction at 0-15cm furrow depth, GPS geotagging, composite quartering, shade drying, and 2mm stainless mesh sieving. Assessed via Field Assignment.</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>Module 3: Soil Testing using SoiLENZ Handheld Device (Practical ⚡ • 18 Hours)</strong>
+        <span>Operating proprietary optical sensor: two-point buffer calibration (pH 4.0/7.0), quartz cuvette loading, automated 90-second multi-parameter scan. Assessed via SoiLENZ Challenge.</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <strong>Module 4: Soil Health Reports & Farmer Advisory (Practical 🌾 • 18 Hours)</strong>
+        <span>Generating Soil Health Cards, calculating customized fertilizer dosage, and student-led vernacular advisory meetings with village farmers. Assessed via Village Advisory Capstone.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2: STEP-BY-STEP WORKFLOWS & DATA GATES -->
+<div class="page">
+  <div class="header">
+    <div>
+      <h1>Arkashine Innovation Lab</h1>
+      <p>Operational Data Flows, Eligibility Gating & Attendance Engine</p>
+    </div>
+    <div>
+      <span class="badge">Page 2 of 2</span>
+    </div>
+  </div>
+
+  <h2>3. Student 8-Step Soil Testing Lifecycle</h2>
+  <div class="flow-box">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <div><strong>Step 1: Collect</strong> - Auger core at 0-15cm depth</div>
+      <div><strong>Step 2: Prepare</strong> - Shade drying & 2mm sieving</div>
+      <div><strong>Step 3: Test</strong> - SoiLENZ 90-second multi-scan</div>
+      <div><strong>Step 4: Record</strong> - Geotag & cloud telemetry sync</div>
+      <div><strong>Step 5: Analyze</strong> - N-P-K & Organic Carbon balance</div>
+      <div><strong>Step 6: Interpret</strong> - Soil Health Index calculation</div>
+      <div><strong>Step 7: Report</strong> - Print vernacular Soil Health Card</div>
+      <div><strong>Step 8: Apply</strong> - Farmer consultation & fertilizer dosing</div>
+    </div>
+  </div>
+
+  <h2>4. Faculty Coordinator Daily Update Engine (&lt; 3 Minutes)</h2>
+  <div class="flow-box">
+    <div class="flow-step">
+      <div class="step-num">A</div>
+      <div class="step-content">
+        <strong>Step 1: Session Format & Hours</strong>
+        <span>Select Module (1 to 4) and Session Type (Theory vs Practical). Set hours taught with stepper (+/- 0.5h).</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">B</div>
+      <div class="step-content">
+        <strong>Step 2: 1-Tap Attendance Matrix</strong>
+        <span>Large touch cards for each cohort student. Tap to toggle Present 🟢 → Late 🟡 → Absent 🔴 (or click "All Present"). Draft auto-saves locally.</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">C</div>
+      <div class="step-content">
+        <strong>Step 3: Lab Tests & Field Telemetry</strong>
+        <span>Input SoiLENZ tests completed, farmers consulted, and reagent stock used. Attach lab photo evidence.</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">D</div>
+      <div class="step-content">
+        <strong>Step 4: Instant Publish & Heat Map Sync</strong>
+        <span>Click Submit. Instantly updates student hours, unlocks badges, and turns the school's heat map cell to green across Principal and Super Admin dashboards.</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>5. Strict School Eligibility & Certification Gates</h2>
+  <div class="highlight-card">
+    <strong>Gate 1: School Eligibility Approval</strong>
+    <p style="margin: 4px 0 0; font-size: 8.5pt;">
+      Schools submit 18 verification points across Space, Infrastructure, Safety, Faculty, Students (80+ registrations), and signed MoU. Requires ≥85% score with 0 critical flags before changing status from "Pending" to "Enrolled".
+    </p>
+  </div>
+  <div class="highlight-card">
+    <strong>Gate 2: Soil Partner Certification Gate</strong>
+    <p style="margin: 4px 0 0; font-size: 8.5pt;">
+      Students must achieve: 1) ≥80% attendance rate (≥58 of 72 hours), 2) Pass all 4 modules, 3) Complete hands-on SoiLENZ testing practical, and 4) Complete farmer advisory. Includes tamper-proof QR code verification.
+    </p>
+  </div>
+
+  <h2>6. Live Color Theme Customizer (For Client Demos)</h2>
+  <p style="font-size: 9pt;">
+    The dashboard includes a top-bar <strong>Theme Colors 🎨</strong> switcher with 6 one-click presets:
+    <strong>Forest Emerald</strong> (Nature/Agritech), 
+    <strong>Deep Navy & Sky</strong> (Ed-Tech), 
+    <strong>Warm Earth & Amber</strong> (Soil/Farming), 
+    <strong>Modern Ocean Teal</strong> (Sustainability), 
+    <strong>Royal Purple</strong> (Innovation), and 
+    <strong>Minimal Slate</strong> (Monochrome). Fine-tuning color pickers allow custom branding live.
+  </p>
+</div>
+
+<div class="footer">
+  Arkashine Innovations Pvt. Ltd. • School Innovation Lab Documentation • Generated October 2026
+</div>
+
+</body>
+</html>
