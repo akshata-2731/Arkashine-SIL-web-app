@@ -15,7 +15,7 @@ import { storageService } from '../../services/storageService';
 import { ProgramTargets, BudgetLine, InventoryItem, AuditLog } from '../../types';
 
 export const ArkashineSettings: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'budget' | 'targets' | 'inventory' | 'audit'>('budget');
+  const [activeTab, setActiveTab] = useState<'targets' | 'inventory' | 'budget' | 'audit'>('targets');
   const [budgetLines, setBudgetLines] = useState<BudgetLine[]>(storageService.getBudgetLines());
   const [inventory, setInventory] = useState<InventoryItem[]>(storageService.getInventory('SCH-01'));
   const [targets, setTargets] = useState<ProgramTargets>(storageService.getProgramTargets());
@@ -90,36 +90,36 @@ export const ArkashineSettings: React.FC = () => {
       {/* Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 pb-2 text-xs font-semibold">
         <button
-          onClick={() => setActiveTab('budget')}
-          className={`px-4 py-2 rounded-xl transition-all ${
-            activeTab === 'budget' ? 'bg-emerald-800 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
-          }`}
-        >
-          Budget vs Actual (29 Lines)
-        </button>
-        <button
           onClick={() => setActiveTab('targets')}
-          className={`px-4 py-2 rounded-xl transition-all ${
-            activeTab === 'targets' ? 'bg-emerald-800 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+          className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+            activeTab === 'targets' ? 'btn-theme-primary font-bold shadow-xs' : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          Dynamic Program Targets
+          🎯 Program Targets & Hours
         </button>
         <button
           onClick={() => setActiveTab('inventory')}
-          className={`px-4 py-2 rounded-xl transition-all ${
-            activeTab === 'inventory' ? 'bg-emerald-800 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+          className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+            activeTab === 'inventory' ? 'btn-theme-primary font-bold shadow-xs' : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          Lab Hardware & Consumables
+          🔬 SoiLENZ Devices & Kits
         </button>
         <button
           onClick={() => setActiveTab('audit')}
-          className={`px-4 py-2 rounded-xl transition-all ${
-            activeTab === 'audit' ? 'bg-emerald-800 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+          className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+            activeTab === 'audit' ? 'btn-theme-primary font-bold shadow-xs' : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          Audit Log
+          📋 System Audit Log
+        </button>
+        <button
+          onClick={() => setActiveTab('budget')}
+          className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
+            activeTab === 'budget' ? 'btn-theme-primary font-bold shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          💰 Pilot Budget (₹5L Ceiling)
         </button>
       </div>
 
