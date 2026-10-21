@@ -8,6 +8,7 @@ import { DayHistoryDrawer } from './components/heatmap/DayHistoryDrawer';
 import { SchoolTimelineModal } from './components/heatmap/SchoolTimelineModal';
 import { RoleRouteGuard, ROLE_DEFAULT_ROUTES } from './components/routing/RoleRouteGuard';
 import { PageLoadingFallback } from './components/common/PageLoadingFallback';
+import { AppFooter } from './components/layout/AppFooter';
 
 // Arkashine Pages (Lazy loaded)
 const ArkashineOverview = lazy(() => import('./pages/arkashine/ArkashineOverview').then(m => ({ default: m.ArkashineOverview })));
@@ -316,6 +317,9 @@ const MainLayout: React.FC = () => {
             </Routes>
           </Suspense>
         </main>
+
+        {/* Founding Team & Platform Leadership Footer */}
+        <AppFooter />
       </div>
 
       {/* Global Heatmap Day History Drawer */}

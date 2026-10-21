@@ -5,13 +5,16 @@ import {
   Award, 
   Sprout, 
   AlertTriangle, 
-  ChevronRight
+  ChevronRight,
+  Map as MapIcon,
+  LayoutGrid
 } from 'lucide-react';
 import { KpiCard } from '../../components/common/KpiCard';
 import { StatusChip } from '../../components/common/StatusChip';
 import { School } from '../../types';
 import { storageService } from '../../services/storageService';
 import { EligibilityModal } from '../../components/school/EligibilityModal';
+import { IndiaMap } from '../../components/map/IndiaMap';
 
 interface ArkashineOverviewProps {
   onNavigateTab: (tab: string) => void;
@@ -25,6 +28,7 @@ export const ArkashineOverview: React.FC<ArkashineOverviewProps> = ({
   const schools = storageService.getSchools();
   const students = storageService.getStudents();
   const [selectedSchoolForEligibility, setSelectedSchoolForEligibility] = useState<School | null>(null);
+  const [hubViewMode, setHubViewMode] = useState<'map' | 'grid'>('map');
 
   // 4 Core KPIs (Simple First: max 4 cards)
   const enrolledSchoolsCount = schools.filter(s => s.status === 'Running' || s.status === 'Enrolled').length;
@@ -66,7 +70,7 @@ export const ArkashineOverview: React.FC<ArkashineOverviewProps> = ({
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border border-slate-200 shadow-2xs shrink-0 bg-white">
             <img
-              src="/assets/images/tree-soil-ecosystem.webp"
+              src="/assets/images/tree-soil-ecosystem.png"
               alt="Healthy soil feeding vibrant trees"
               width={96}
               height={96}
@@ -144,56 +148,94 @@ export const ArkashineOverview: React.FC<ArkashineOverviewProps> = ({
       {/* Main Section: 1 Main Visual (Active Lab Hubs) + 1 Clean List (Needs Attention) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Left 2 Cols: Main Visual (Clean School Deployment Grid) */}
+        {/* Left 2 Cols: Main Visual (Clean School Deployment Grid / India Map) */}
         <div className="lg:col-span-2 bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">
-                School Lab Deployment Hubs
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <span>School Lab Deployment Geography</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  {schools.length} Hubs
+                </span>
               </h3>
               <p className="text-xs text-slate-500">
-                Operational status across Western, Central, and Southern zones
+                Operational status across Maharashtra, Karnataka, MP, UP, and Southern zones
               </p>
             </div>
-            <button
-              onClick={() => onNavigateTab('schools')}
-              className="text-xs font-semibold text-emerald-800 hover:underline"
-            >
-              View all ({schools.length})
-            </button>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {schools.map(sch => (
-              <div
-                key={sch.id}
-                onClick={() => onOpenSchoolTimeline(sch.id)}
-                className="p-4 rounded-xl border border-slate-200/70 hover:border-slate-300 hover:bg-slate-50/50 cursor-pointer transition-all flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
-                      {sch.code}
-                    </span>
-                    <StatusChip status={sch.status} size="sm" />
-                  </div>
-                  <h4 className="font-bold text-xs text-slate-900 line-clamp-1">
-                    {sch.name}
-                  </h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    {sch.city}, {sch.state}
-                  </p>
-                </div>
-
-                <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                  <span>{sch.status === 'Running' ? `Day ${sch.currentDay} of 28` : sch.status.replace(/_/g, ' ')}</span>
-                  <span className="font-semibold text-emerald-800 flex items-center gap-0.5">
-                    Timeline <ChevronRight className="w-3 h-3" />
-                  </span>
-                </div>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center p-1 bg-slate-100 rounded-xl text-xs font-bold border border-slate-200/80">
+                <button
+                  type="button"
+                  onClick={() => setHubViewMode('map')}
+                  className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
+                    hubViewMode === 'map' ? 'bg-white text-emerald-800 shadow-2xs font-black' : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <MapIcon className="w-3.5 h-3.5" />
+                  <span>Map</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHubViewMode('grid')}
+                  className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
+                    hubViewMode === 'grid' ? 'bg-white text-emerald-800 shadow-2xs font-black' : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <span>Grid</span>
+                </button>
               </div>
-            ))}
+
+              <button
+                onClick={() => onNavigateTab('schools')}
+                className="text-xs font-bold text-emerald-800 hover:underline shrink-0"
+              >
+                View all ({schools.length})
+              </button>
+            </div>
           </div>
+
+          {hubViewMode === 'map' ? (
+            <div className="py-1">
+              <IndiaMap
+                schools={schools}
+                onSelectSchool={(sch) => onOpenSchoolTimeline(sch.id)}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {schools.map(sch => (
+                <div
+                  key={sch.id}
+                  onClick={() => onOpenSchoolTimeline(sch.id)}
+                  className="p-4 rounded-xl border border-slate-200/70 hover:border-slate-300 hover:bg-slate-50/50 cursor-pointer transition-all flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+                        {sch.code}
+                      </span>
+                      <StatusChip status={sch.status} size="sm" />
+                    </div>
+                    <h4 className="font-bold text-xs text-slate-900 line-clamp-1">
+                      {sch.name}
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      {sch.city}, {sch.state}
+                    </p>
+                  </div>
+
+                  <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>{sch.status === 'Running' ? `Day ${sch.currentDay} of 28` : sch.status.replace(/_/g, ' ')}</span>
+                    <span className="font-semibold text-emerald-800 flex items-center gap-0.5">
+                      Timeline <ChevronRight className="w-3 h-3" />
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Right Col: Clean "Needs Attention" List */}
