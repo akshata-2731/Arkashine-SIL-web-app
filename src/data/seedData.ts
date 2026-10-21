@@ -197,6 +197,7 @@ export const SEED_SCHOOLS: School[] = [
     currentDay: 20,
     totalStudentsSelected: 18,
     coordinates: { lat: 18.1517, lng: 74.5770 },
+    bannerImage: '/assets/images/hero-banner.png',
     createdAt: '2026-05-10',
     eligibility: {
       score: 96,
@@ -226,6 +227,7 @@ export const SEED_SCHOOLS: School[] = [
     currentDay: 21,
     totalStudentsSelected: 19,
     coordinates: { lat: 22.5645, lng: 72.9289 },
+    bannerImage: '/assets/images/module-soil-testing.png',
     createdAt: '2026-05-12',
     eligibility: {
       score: 91,
@@ -255,6 +257,7 @@ export const SEED_SCHOOLS: School[] = [
     currentDay: 19,
     totalStudentsSelected: 17,
     coordinates: { lat: 22.7519, lng: 77.7289 },
+    bannerImage: '/assets/images/module-sample-collection.png',
     createdAt: '2026-05-14',
     eligibility: {
       score: 93,
@@ -284,6 +287,7 @@ export const SEED_SCHOOLS: School[] = [
     currentDay: 0,
     totalStudentsSelected: 18,
     coordinates: { lat: 29.6857, lng: 76.9905 },
+    bannerImage: '/assets/images/student-lab-discovery.png',
     createdAt: '2026-05-20',
     eligibility: {
       score: 92,
@@ -313,6 +317,7 @@ export const SEED_SCHOOLS: School[] = [
     currentDay: 0,
     totalStudentsSelected: 0,
     coordinates: { lat: 17.9689, lng: 79.5941 },
+    bannerImage: '/assets/images/eligibility-check.png',
     createdAt: '2026-05-28',
     eligibility: {
       score: 74,
@@ -345,6 +350,7 @@ export const SEED_SCHOOLS: School[] = [
     currentDay: 0,
     totalStudentsSelected: 0,
     coordinates: { lat: 27.5530, lng: 76.6346 },
+    bannerImage: '/assets/images/empty-state.png',
     createdAt: '2026-06-02',
     eligibility: {
       score: 41,

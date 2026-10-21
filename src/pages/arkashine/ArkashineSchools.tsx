@@ -85,89 +85,119 @@ export const ArkashineSchools: React.FC<ArkashineSchoolsProps> = ({ onOpenDayHis
         </div>
       </div>
 
-      {/* School Cards Grid */}
+      {/* School Cards Grid - Pictorial Lab Visuals */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filteredSchools.map(school => (
           <div
             key={school.id}
-            className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+            className="bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group"
           >
             <div>
-              {/* Header */}
-              <div className="flex items-start justify-between gap-2 mb-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-mono uppercase bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-bold">
-                      {school.code}
-                    </span>
-                    <StatusChip status={school.status} size="sm" />
-                  </div>
-                  <h3 className="font-bold text-sm text-slate-900 leading-snug line-clamp-1">
-                    {school.name}
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    {school.city}, {school.state}
-                  </p>
-                </div>
+              {/* Pictorial Card Banner */}
+              <div className="h-32 sm:h-36 w-full relative overflow-hidden bg-slate-100 border-b border-slate-100">
+                <img
+                  src={school.bannerImage || '/assets/images/hero-banner.png'}
+                  alt={school.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                 
-                {/* Score Ring */}
-                <div className="shrink-0">
+                {/* Overlay Chips */}
+                <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                  <span className="text-[10px] font-mono font-bold uppercase bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md text-slate-800 shadow-2xs">
+                    {school.code}
+                  </span>
+                  <StatusChip status={school.status} size="sm" />
+                </div>
+
+                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-xs p-1 rounded-xl shadow-2xs">
                   <ScoreRing
                     score={school.eligibility.score}
-                    size={56}
-                    strokeWidth={6}
+                    size={46}
+                    strokeWidth={5}
                     showPercent={true}
                   />
                 </div>
-              </div>
 
-              {/* People & Contact Details */}
-              <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-600">
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Principal:</span>
-                  <span className="font-medium text-slate-800 truncate max-w-[170px]">{school.principalName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Faculty Lead:</span>
-                  <span className="font-medium text-slate-800 truncate max-w-[170px]">{school.facultyName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Active Stage:</span>
-                  <span className="font-bold text-emerald-800">
-                    {school.status === 'Running' ? `Day ${school.currentDay} of 28` : school.status.replace(/_/g, ' ')}
-                  </span>
+                <div className="absolute bottom-2.5 left-3 right-3 text-white">
+                  <h3 className="font-extrabold text-sm leading-snug truncate drop-shadow-xs">
+                    {school.name}
+                  </h3>
+                  <p className="text-[11px] text-white/85 flex items-center gap-1 drop-shadow-xs">
+                    📍 {school.city}, {school.state}
+                  </p>
                 </div>
               </div>
 
-              {/* Rejection or Condition Notice */}
-              {school.eligibility.result === 'Not_Eligible' && (
-                <div className="mt-3 p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-[11px] text-rose-800">
-                  <span className="font-bold">Ineligible:</span> Disqualified on laboratory space & faculty criteria.
+              {/* Pictorial Metrics Row */}
+              <div className="p-4 space-y-3">
+                <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                  <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Cohort</span>
+                    <strong className="text-slate-800 text-sm">
+                      {school.totalStudentsSelected > 0 ? `${school.totalStudentsSelected} 🎓` : 'Funnel'}
+                    </strong>
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Stage</span>
+                    <strong className="text-purple-700 text-xs truncate block mt-0.5">
+                      {school.status === 'Running' ? `Day ${school.currentDay}/28` : school.status.replace(/_/g, ' ')}
+                    </strong>
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Health</span>
+                    <strong className={`text-xs capitalize ${
+                      school.healthStatus === 'healthy' ? 'text-emerald-700' : (school.healthStatus === 'attention' ? 'text-amber-700' : 'text-rose-700')
+                    }`}>
+                      {school.healthStatus === 'healthy' ? '🟢 On Track' : (school.healthStatus === 'attention' ? '🟡 Review' : '🔴 Action')}
+                    </strong>
+                  </div>
                 </div>
-              )}
-              {school.eligibility.result === 'Eligible_With_Conditions' && (
-                <div className="mt-3 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-800">
-                  <span className="font-bold">Conditions:</span> Wi-Fi mesh & safety goggles upgrade pending.
+
+                {/* People Pills */}
+                <div className="space-y-1 text-xs">
+                  <div className="flex items-center justify-between text-slate-600 bg-slate-50/70 p-1.5 px-2.5 rounded-lg border border-slate-100">
+                    <span className="text-slate-400 text-[11px]">Lead Faculty:</span>
+                    <span className="font-semibold text-slate-800 truncate max-w-[170px]">{school.facultyName}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-slate-600 bg-slate-50/70 p-1.5 px-2.5 rounded-lg border border-slate-100">
+                    <span className="text-slate-400 text-[11px]">Principal:</span>
+                    <span className="font-semibold text-slate-800 truncate max-w-[170px]">{school.principalName}</span>
+                  </div>
                 </div>
-              )}
+
+                {/* Rejection or Condition Notice */}
+                {school.eligibility.result === 'Not_Eligible' && (
+                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-[11px] text-rose-800 flex items-start gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />
+                    <span><strong>Ineligible:</strong> Laboratory space and faculty criteria unmet.</span>
+                  </div>
+                )}
+                {school.eligibility.result === 'Eligible_With_Conditions' && (
+                  <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-800 flex items-start gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                    <span><strong>Condition:</strong> Wi-Fi repeater & 10 safety goggles pending.</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Bottom Actions */}
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+            <div className="p-4 pt-0 flex items-center justify-between gap-2">
               <button
                 onClick={() => setSelectedSchoolForEligibility(school)}
-                className="flex-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors flex items-center justify-center gap-1"
+                className="flex-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-                Eligibility Checklist
+                <ShieldCheck className="w-3.5 h-3.5 text-purple-700" />
+                Eligibility Check
               </button>
               
               {school.status === 'Running' && (
                 <button
                   onClick={() => setSelectedSchoolForTimeline(school.id)}
-                  className="py-2 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs transition-colors"
+                  className="py-2 px-3.5 rounded-xl btn-theme-primary font-semibold text-xs transition-colors shadow-2xs cursor-pointer"
                 >
-                  Timeline
+                  Timeline 📅
                 </button>
               )}
             </div>

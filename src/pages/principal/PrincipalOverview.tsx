@@ -70,10 +70,43 @@ export const PrincipalOverview: React.FC<PrincipalOverviewProps> = ({
 
         <button
           onClick={() => onNavigateTab('logs')}
-          className="self-start sm:self-center px-4 py-2 bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs rounded-xl shadow-2xs transition-colors"
+          className="self-start sm:self-center px-4 py-2 btn-theme-primary font-bold text-xs rounded-xl shadow-2xs transition-colors cursor-pointer"
         >
           View Daily Log Timeline →
         </button>
+      </div>
+
+      {/* Pictorial Welcome Card with Lab Banner */}
+      <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-xs flex flex-col md:flex-row items-center justify-between">
+        <div className="p-6 flex-1">
+          <span className="badge-theme text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full inline-block mb-1 border">
+            School Innovation Lab Overview
+          </span>
+          <h2 className="text-xl font-extrabold text-slate-900">
+            {school.name}
+          </h2>
+          <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+            Leading the Summer Vacations Soil Health mandate in {school.city}. Students conduct precision tests with handheld SoiLENZ devices and assist local village farmers with customized fertilizer recommendations.
+          </p>
+          <div className="flex items-center gap-4 mt-3 text-xs text-slate-700">
+            <span className="flex items-center gap-1 font-bold text-purple-700">
+              🌱 Day {school.currentDay} of 28
+            </span>
+            <span className="flex items-center gap-1 font-bold text-emerald-700">
+              🎓 18 Enrolled Students
+            </span>
+            <span className="flex items-center gap-1 font-bold text-amber-700">
+              🌾 5 Field Teams
+            </span>
+          </div>
+        </div>
+        <div className="w-full md:w-64 h-40 md:h-full bg-slate-100 overflow-hidden shrink-0 border-t md:border-t-0 md:border-l border-slate-100">
+          <img
+            src="/assets/images/hero-banner.png"
+            alt="School lab testing soil"
+            className="w-full h-full object-cover"
+          />
+        </div>
       </div>
 
       {/* 4 Core Scorecard Cards */}
