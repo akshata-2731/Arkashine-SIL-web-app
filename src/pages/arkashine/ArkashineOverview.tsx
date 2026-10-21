@@ -57,9 +57,42 @@ export const ArkashineOverview: React.FC<ArkashineOverviewProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => onNavigateTab('heatmap')}
-            className="px-3.5 py-1.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs transition-colors shadow-2xs flex items-center gap-1.5"
+            className="px-3.5 py-1.5 rounded-xl btn-theme-primary text-xs font-semibold shadow-2xs flex items-center gap-1.5 cursor-pointer"
           >
             Open Program Heat Map →
+          </button>
+        </div>
+      </div>
+
+      {/* Inspiring Kid & Tree Science Discovery Banner */}
+      <div className="bg-gradient-to-r from-purple-50 via-emerald-50 to-amber-50 rounded-3xl p-5 border border-slate-200/90 shadow-xs flex flex-col md:flex-row items-center justify-between gap-5">
+        <div className="flex items-center gap-4">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border border-slate-200 shadow-2xs shrink-0 bg-white">
+            <img
+              src="/assets/images/tree-soil-ecosystem.png"
+              alt="Healthy soil feeding vibrant trees"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="max-w-xl">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-800 bg-purple-100/70 px-2 py-0.5 rounded-full border border-purple-200 inline-block mb-1">
+              Living Soil & Agro-Forestry
+            </span>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+              Inspiring the Next Generation of Soil Guardians 🌱
+            </h2>
+            <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+              Middle & high school students investigate living soil layers, tree root micro-biology, and provide real-time fertility diagnostic cards to rural farmers.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => onNavigateTab('schools')}
+            className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold border border-slate-200 shadow-2xs transition-colors cursor-pointer"
+          >
+            Inspect Lab Cohorts
           </button>
         </div>
       </div>
