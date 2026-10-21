@@ -28,8 +28,36 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({
   currentTab = 'journey',
   onTabChange
 }) => {
-  const { activeStudentId } = useAuth();
-  const student = storageService.getStudent(activeStudentId) || storageService.getStudents()[0];
+  const { activeStudentId, switchRole } = useAuth();
+  const allStudents = storageService.getStudents();
+  const student = storageService.getStudent(activeStudentId) || allStudents[0] || {
+    id: 'SCH-01-STU-01',
+    schoolId: 'SCH-01',
+    name: 'Ananya Sharma',
+    rollNo: 'SIL-2026-101',
+    gender: 'Female',
+    classGrade: 'X' as const,
+    groupNumber: 1,
+    avatar: '',
+    selectionStage: 'Selected' as const,
+    quizScore: 92,
+    assignmentScore: 88,
+    attendanceRate: 94,
+    totalPresentDays: 19,
+    totalLoggedDays: 20,
+    modulesCompleted: 4,
+    practicalsDone: 8,
+    outreachFarmersCount: 52,
+    soilSamplesTestedCount: 28,
+    capstoneSubmitted: true,
+    certificateStatus: 'Issued' as const,
+    missingFields: [],
+    badgeIds: ['badge-sampler', 'badge-tester', 'badge-reporter', 'badge-farmer-friend', 'badge-ambassador']
+  };
+
+  const handleStudentSelect = (newStudentId: string) => {
+    switchRole('student', undefined, newStudentId);
+  };
 
   // Bilingual Language State (English / Hindi)
   const [language, setLanguage] = useState<'en' | 'hi'>(() => {
@@ -113,9 +141,21 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${studentLevel.badgeColor} shadow-2xs`}>
                 {studentLevel.title}
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-white text-emerald-800 text-xs font-bold border border-emerald-200 shadow-2xs">
-                Group {student.groupNumber} Lead
-              </span>
+              <div className="flex items-center gap-1 bg-white px-2.5 py-0.5 rounded-full border border-emerald-200 shadow-2xs text-xs font-bold text-emerald-800">
+                <span className="hidden sm:inline">Profile:</span>
+                <select
+                  value={student.id}
+                  onChange={(e) => handleStudentSelect(e.target.value)}
+                  className="bg-transparent font-bold text-emerald-900 cursor-pointer focus:outline-hidden"
+                  aria-label="Switch active student"
+                >
+                  {allStudents.slice(0, 18).map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} (Grp {s.groupNumber})
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               {language === 'hi' ? `नमस्ते, ${student.name.split(' ')[0]}!` : `Hello, ${student.name.split(' ')[0]}!`} 👋

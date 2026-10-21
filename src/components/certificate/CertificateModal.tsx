@@ -234,11 +234,11 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                     </p>
                   </div>
 
-                  {/* Right Signature: Arkashine Director */}
+                  {/* Right Signature: Arkashine Co-Founder & CEO */}
                   <div className="text-center">
-                    <p className="font-serif italic text-slate-800 text-sm">Dr. Vivek Saxena</p>
+                    <p className="font-serif italic text-slate-800 text-sm">Dr. Sudha R. Karbari</p>
                     <div className="w-24 h-0.5 bg-slate-300 mx-auto my-1" />
-                    <p className="text-[10px] uppercase font-bold text-slate-500">Director, Arkashine</p>
+                    <p className="text-[10px] uppercase font-bold text-slate-500">Co-Founder & CEO, Arkashine</p>
                   </div>
                 </div>
 

@@ -20,11 +20,11 @@ interface AuthContextType {
 const DEFAULT_USERS: Record<Role, UserProfile> = {
   arkashine: {
     id: 'USR-ARK-01',
-    name: 'Dr. Vivek Saxena',
-    email: 'vivek.saxena@arkashine.com',
+    name: 'Dr. Sudha R. Karbari',
+    email: 'sudha@arkashine.com',
     role: 'arkashine',
-    title: 'Director of Academic Partnerships',
-    avatar: getInitialsAvatar('Dr. Vivek Saxena')
+    title: 'Co-Founder & CEO',
+    avatar: getInitialsAvatar('Dr. Sudha R. Karbari')
   },
   partner: {
     id: 'USR-PTR-01',

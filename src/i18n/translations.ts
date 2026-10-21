@@ -119,6 +119,10 @@ export const translations: Translations = {
     en: 'Modules & Quizzes',
     hi: 'मॉड्यूल और क्विज़'
   },
+  'nav.student_diagrams': {
+    en: 'Soil Explorer & Diagrams',
+    hi: 'मृदा अन्वेषक व आरेख'
+  },
   'nav.student_badges': {
     en: 'Badges & Rewards',
     hi: 'बैज और पुरस्कार'

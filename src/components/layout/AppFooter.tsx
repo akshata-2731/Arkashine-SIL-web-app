@@ -5,34 +5,34 @@ import { ARKASHINE_TEAM } from '../../data/teamData';
 export const AppFooter: React.FC = () => {
   const leadershipTeam = [
     {
-      name: 'Akshata Patil',
+      name: 'Dr. Sudha R. Karbari',
       designation: 'Co-Founder & CEO',
-      role: 'Program Director • Agritech Leadership',
+      role: 'Chief Executive Officer • SIL Program Director',
       avatar: ARKASHINE_TEAM[0]?.avatar || '',
       badge: 'Co-Founder & CEO',
       badgeColor: 'bg-amber-400 text-slate-950',
-      email: 'akshata@arkashine.com',
+      email: 'sudha@arkashine.com',
       quote: 'Empowering school students to become certified Soil Partners for India’s farming future.'
     },
     {
-      name: 'Dr. Vivek Saxena',
-      designation: 'Co-Founder & CTO',
-      role: 'Chief Technology Officer • SoiLENZ Sensor Architect',
+      name: 'Akshata Gulannavar',
+      designation: 'Software Developer',
+      role: 'Software Developer • Agritech Platform Engineering',
       avatar: ARKASHINE_TEAM[1]?.avatar || '',
-      badge: 'Co-Founder & CTO',
+      badge: 'Software Developer',
       badgeColor: 'bg-purple-200 text-purple-950',
-      email: 'vivek@arkashine.com',
-      quote: 'Deploying real-time optical soil telemetry to bring laboratory accuracy to village fields.'
+      email: 'akshata@arkashine.com',
+      quote: 'Developing robust digital telemetry and intuitive web interfaces for rural innovators.'
     },
     {
-      name: 'Dr. Sunita Deshmukh',
-      designation: 'Co-Founder & COO',
-      role: 'Director of Academic Partnerships & Operations',
+      name: 'Arpita Kori',
+      designation: 'Software Engineer',
+      role: 'Software Engineer • Cloud Systems & Diagnostics',
       avatar: ARKASHINE_TEAM[2]?.avatar || '',
-      badge: 'Co-Founder & COO',
+      badge: 'Software Engineer',
       badgeColor: 'bg-emerald-200 text-emerald-950',
-      email: 'sunita@arkashine.com',
-      quote: 'Building scalable 72-hour innovation ecosystems across school hubs nationwide.'
+      email: 'arpita@arkashine.com',
+      quote: 'Architecting scalable data pipelines and real-time soil intelligence diagnostics.'
     }
   ];
 

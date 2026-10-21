@@ -1,5 +1,4 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
 import { Role } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 
@@ -17,12 +16,13 @@ interface RoleRouteGuardProps {
 }
 
 export const RoleRouteGuard: React.FC<RoleRouteGuardProps> = ({ allowedRole, children }) => {
-  const { currentRole } = useAuth();
+  const { currentRole, switchRole } = useAuth();
 
-  if (currentRole !== allowedRole) {
-    const defaultRoute = ROLE_DEFAULT_ROUTES[currentRole] || '/arkashine/overview';
-    return <Navigate to={defaultRoute} replace />;
-  }
+  useEffect(() => {
+    if (currentRole !== allowedRole) {
+      switchRole(allowedRole);
+    }
+  }, [allowedRole, currentRole, switchRole]);
 
   return <>{children}</>;
 };

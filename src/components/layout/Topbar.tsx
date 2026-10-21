@@ -108,7 +108,7 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenMobileNav, pageTitle }) =>
           className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200/80 text-[#5C26C0] font-bold text-xs transition-colors cursor-pointer"
         >
           <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-          <span>Founding Team: Akshata Patil • Dr. Vivek • Dr. Sunita</span>
+          <span>Founding Team: Dr. Sudha R. Karbari • Akshata G. • Arpita Kori</span>
         </button>
       </div>
 
