@@ -148,7 +148,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const parsed = JSON.parse(saved);
         if (parsed && parsed.primary) return parsed;
       }
-    } catch (e) {
+    } catch {
       // fallback
     }
     return PRESET_THEMES[0];
@@ -169,7 +169,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(currentTheme));
-    } catch (e) {
+    } catch {
       // ignore
     }
   }, [currentTheme]);

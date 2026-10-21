@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Palette, Check, Sparkles, RefreshCw, Sliders, X } from 'lucide-react';
+import { Palette, Check, RefreshCw, Sliders, X } from 'lucide-react';
 import { useTheme, PRESET_THEMES } from '../../context/ThemeContext';
 
 export const ThemeColorPicker: React.FC = () => {

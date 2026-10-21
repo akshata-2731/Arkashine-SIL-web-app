@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  Users, 
-  Search, 
-  CheckCircle2, 
-  Award, 
-  Check, 
-  Plus, 
-  Minus,
-  Sparkles
-} from 'lucide-react';
+import { Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { storageService } from '../../services/storageService';
 import { Student } from '../../types';

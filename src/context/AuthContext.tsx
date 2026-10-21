@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Role, UserProfile, School } from '../types';
 import { storageService } from '../services/storageService';
+import { getInitialsAvatar } from '../utils/avatarUtils';
 
 interface AuthContextType {
   currentRole: Role;
@@ -10,7 +11,7 @@ interface AuthContextType {
   activeStudentId: string;
   language: 'en' | 'hi';
   toggleLanguage: () => void;
-  switchRole: (role: Role, schoolId?: string, studentId?: string) => void;
+  switchRole: (role: Role, schoolId?: string, studentId?: string, partnerId?: string) => void;
   setActiveSchoolId: (id: string) => void;
   schools: School[];
   refreshData: () => void;
@@ -23,7 +24,7 @@ const DEFAULT_USERS: Record<Role, UserProfile> = {
     email: 'vivek.saxena@arkashine.com',
     role: 'arkashine',
     title: 'Director of Academic Partnerships',
-    avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=VivekSaxena'
+    avatar: getInitialsAvatar('Dr. Vivek Saxena')
   },
   partner: {
     id: 'USR-PTR-01',
@@ -32,7 +33,7 @@ const DEFAULT_USERS: Record<Role, UserProfile> = {
     role: 'partner',
     partnerId: 'PARTNER-01',
     title: 'State Lead, GreenHorizon AgriEd',
-    avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=SunitaDeshmukh'
+    avatar: getInitialsAvatar('Dr. Sunita Deshmukh')
   },
   principal: {
     id: 'USR-PRN-01',
@@ -41,7 +42,7 @@ const DEFAULT_USERS: Record<Role, UserProfile> = {
     role: 'principal',
     schoolId: 'SCH-01',
     title: "Principal, St. Xavier's Model School",
-    avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=ThomasMatthew'
+    avatar: getInitialsAvatar('Fr. Thomas Matthew')
   },
   faculty: {
     id: 'USR-FAC-01',
@@ -50,7 +51,7 @@ const DEFAULT_USERS: Record<Role, UserProfile> = {
     role: 'faculty',
     schoolId: 'SCH-01',
     title: 'Senior Faculty & Innovation Coordinator',
-    avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=AnjaliPatil'
+    avatar: getInitialsAvatar('Dr. Anjali Patil')
   },
   student: {
     id: 'USR-STU-01',
@@ -60,37 +61,62 @@ const DEFAULT_USERS: Record<Role, UserProfile> = {
     schoolId: 'SCH-01',
     studentId: 'SCH-01-STU-01',
     title: 'Class X-A • Group 1 Lead (Soil Explorers)',
-    avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=AnanyaSharma'
+    avatar: getInitialsAvatar('Ananya Sharma')
   }
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const getInitialRole = (): Role => {
+  if (typeof window !== 'undefined' && window.location?.pathname) {
+    const path = window.location.pathname;
+    if (path.startsWith('/partner')) return 'partner';
+    if (path.startsWith('/principal')) return 'principal';
+    if (path.startsWith('/faculty')) return 'faculty';
+    if (path.startsWith('/student')) return 'student';
+    if (path.startsWith('/arkashine')) return 'arkashine';
+  }
+  return 'arkashine';
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentRole, setCurrentRole] = useState<Role>('arkashine');
+  const [currentRole, setCurrentRole] = useState<Role>(getInitialRole);
   const [activeSchoolId, setActiveSchoolId] = useState<string>('SCH-01');
   const [activePartnerId, setActivePartnerId] = useState<string>('PARTNER-01');
   const [activeStudentId, setActiveStudentId] = useState<string>('SCH-01-STU-01');
-  const [language, setLanguage] = useState<'en' | 'hi'>('en');
+  const [language, setLanguage] = useState<'en' | 'hi'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('ark_sil_language');
+      if (saved === 'hi' || saved === 'en') return saved;
+    }
+    return 'en';
+  });
   const [schools, setSchools] = useState<School[]>([]);
+
+  const refreshData = () => {
+    setSchools(storageService.getSchools());
+  };
 
   useEffect(() => {
     storageService.init();
     refreshData();
   }, []);
 
-  const refreshData = () => {
-    setSchools(storageService.getSchools());
-  };
-
-  const switchRole = (role: Role, schoolId?: string, studentId?: string) => {
+  const switchRole = (role: Role, schoolId?: string, studentId?: string, partnerId?: string) => {
     setCurrentRole(role);
     if (schoolId) setActiveSchoolId(schoolId);
     if (studentId) setActiveStudentId(studentId);
+    if (partnerId) setActivePartnerId(partnerId);
   };
 
   const toggleLanguage = () => {
-    setLanguage(prev => prev === 'en' ? 'hi' : 'en');
+    setLanguage(prev => {
+      const next = prev === 'en' ? 'hi' : 'en';
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('ark_sil_language', next);
+      }
+      return next;
+    });
   };
 
   const currentUser = {

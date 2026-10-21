@@ -1,33 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Settings2, 
-  DollarSign, 
-  Package, 
-  Target, 
-  FileSpreadsheet, 
-  History, 
   Save, 
-  CheckCircle2, 
-  AlertTriangle,
-  Download
+  Download,
+  AlertTriangle
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { ProgramTargets, BudgetLine, InventoryItem, AuditLog } from '../../types';
 
 export const ArkashineSettings: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'targets' | 'inventory' | 'budget' | 'audit'>('targets');
-  const [budgetLines, setBudgetLines] = useState<BudgetLine[]>(storageService.getBudgetLines());
-  const [inventory, setInventory] = useState<InventoryItem[]>(storageService.getInventory('SCH-01'));
-  const [targets, setTargets] = useState<ProgramTargets>(storageService.getProgramTargets());
-  const [auditLogs] = useState<AuditLog[]>(storageService.getAuditLogs());
+  const [budgetLines] = useState<BudgetLine[]>(() => storageService.getBudgetLines());
+  const [inventory] = useState<InventoryItem[]>(() => storageService.getInventory('SCH-01'));
+  const [targets, setTargets] = useState<ProgramTargets>(() => storageService.getProgramTargets());
+  const [auditLogs] = useState<AuditLog[]>(() => storageService.getAuditLogs());
   const [savedNotice, setSavedNotice] = useState<string | null>(null);
 
   const totalPlanned = budgetLines.reduce((acc, b) => acc + b.plannedAmount, 0);
   const totalActual = budgetLines.reduce((acc, b) => acc + b.actualAmount, 0);
   const totalVariance = totalPlanned - totalActual;
 
+  // Validation for targets
+  const targetErrors = useMemo(() => {
+    const errs: Record<string, string> = {};
+    if (isNaN(targets.totalHours) || targets.totalHours <= 0 || targets.totalHours > 200) {
+      errs.totalHours = 'Total training hours must be between 1 and 200.';
+    }
+    if (isNaN(targets.weeklyHours) || targets.weeklyHours <= 0 || targets.weeklyHours > 50) {
+      errs.weeklyHours = 'Weekly hours must be between 1 and 50.';
+    }
+    if (isNaN(targets.attendanceThreshold) || targets.attendanceThreshold < 50 || targets.attendanceThreshold > 100) {
+      errs.attendanceThreshold = 'Attendance threshold must be between 50% and 100%.';
+    }
+    if (isNaN(targets.targetFarmersPerSchool) || targets.targetFarmersPerSchool < 10 || targets.targetFarmersPerSchool > 10000) {
+      errs.targetFarmers = 'Farmer target must be between 10 and 10,000.';
+    }
+    if (isNaN(targets.targetSamplesPerSchool) || targets.targetSamplesPerSchool < 10 || targets.targetSamplesPerSchool > 5000) {
+      errs.targetSamples = 'Soil samples target must be between 10 and 5,000.';
+    }
+    if (isNaN(targets.targetCampaignsPerSchool) || targets.targetCampaignsPerSchool < 1 || targets.targetCampaignsPerSchool > 200) {
+      errs.targetCampaigns = 'Campaigns target must be between 1 and 200.';
+    }
+    return errs;
+  }, [targets]);
+
+  const isTargetsValid = Object.keys(targetErrors).length === 0;
+
   const handleSaveTargets = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isTargetsValid) return;
     storageService.saveProgramTargets(targets);
     setSavedNotice('Program targets updated successfully!');
     setTimeout(() => setSavedNotice(null), 4000);
@@ -74,7 +95,7 @@ export const ArkashineSettings: React.FC = () => {
 
         <button
           onClick={handleExportCsv}
-          className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs flex items-center gap-2 transition-colors shadow-xs"
+          className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs flex items-center gap-2 transition-colors shadow-xs cursor-pointer"
         >
           <Download className="w-4 h-4" />
           Export to CSV / Excel
@@ -126,7 +147,6 @@ export const ArkashineSettings: React.FC = () => {
       {/* Tab 1: Budget Tracking */}
       {activeTab === 'budget' && (
         <div className="space-y-4">
-          {/* Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Approved Ceiling</span>
@@ -145,7 +165,6 @@ export const ArkashineSettings: React.FC = () => {
             </div>
           </div>
 
-          {/* Budget Table */}
           <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
@@ -173,9 +192,9 @@ export const ArkashineSettings: React.FC = () => {
                       </td>
                       <td className="p-3.5">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          line.status === 'Within_Budget' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200'
+                          line.status === 'Within_Budget' ? 'bg-emerald-100 text-emerald-800' : (line.status === 'Near_Limit' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')
                         }`}>
-                          {line.status.replace(/_/g, ' ')}
+                          {line.status.replace('_', ' ')}
                         </span>
                       </td>
                     </tr>
@@ -187,87 +206,145 @@ export const ArkashineSettings: React.FC = () => {
         </div>
       )}
 
-      {/* Tab 2: Dynamic Editable Program Targets */}
+      {/* Tab 2: Targets Configuration */}
       {activeTab === 'targets' && (
-        <form onSubmit={handleSaveTargets} className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs space-y-6 max-w-3xl">
+        <form onSubmit={handleSaveTargets} className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs space-y-5">
           <div>
-            <h3 className="text-base font-bold text-slate-800">Global Program Targets</h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Edit academic and operational targets applied dynamically across validation gates and dashboards.
-            </p>
+            <h3 className="text-sm font-bold text-slate-800">Summer Lab Governance Key Parameters</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Program rules governing certification gating and delivery targets</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-              <label className="font-semibold text-slate-700 block mb-1">Total Training Hours</label>
+              <label className="font-semibold text-slate-700 block mb-1">Total Training Hours *</label>
               <input
                 type="number"
+                min="1"
+                max="200"
                 value={targets.totalHours}
                 onChange={(e) => setTargets({ ...targets, totalHours: Number(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-900 focus:outline-hidden focus:border-emerald-500"
+                className={`w-full bg-slate-50 border rounded-xl p-2.5 font-bold text-slate-900 focus:outline-hidden ${
+                  targetErrors.totalHours ? 'border-rose-400 bg-rose-50/20' : 'border-slate-200 focus:border-emerald-500'
+                }`}
               />
-              <span className="text-[11px] text-slate-400">Default: 72 training hours</span>
+              {targetErrors.totalHours ? (
+                <p className="text-rose-600 font-semibold mt-1">⚠️ {targetErrors.totalHours}</p>
+              ) : (
+                <span className="text-[11px] text-slate-400">Default: 72 training hours</span>
+              )}
             </div>
 
             <div>
-              <label className="font-semibold text-slate-700 block mb-1">Hours per Week</label>
+              <label className="font-semibold text-slate-700 block mb-1">Hours per Week *</label>
               <input
                 type="number"
+                min="1"
+                max="50"
                 value={targets.weeklyHours}
                 onChange={(e) => setTargets({ ...targets, weeklyHours: Number(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-900 focus:outline-hidden focus:border-emerald-500"
+                className={`w-full bg-slate-50 border rounded-xl p-2.5 font-bold text-slate-900 focus:outline-hidden ${
+                  targetErrors.weeklyHours ? 'border-rose-400 bg-rose-50/20' : 'border-slate-200 focus:border-emerald-500'
+                }`}
               />
-              <span className="text-[11px] text-slate-400">Default: 18 hours/week (4 weeks)</span>
+              {targetErrors.weeklyHours ? (
+                <p className="text-rose-600 font-semibold mt-1">⚠️ {targetErrors.weeklyHours}</p>
+              ) : (
+                <span className="text-[11px] text-slate-400">Default: 18 hours/week (4 weeks)</span>
+              )}
             </div>
 
             <div>
-              <label className="font-semibold text-slate-700 block mb-1">Attendance Threshold (%)</label>
+              <label className="font-semibold text-slate-700 block mb-1">Attendance Threshold (%) *</label>
               <input
                 type="number"
+                min="50"
+                max="100"
                 value={targets.attendanceThreshold}
                 onChange={(e) => setTargets({ ...targets, attendanceThreshold: Number(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-900 focus:outline-hidden focus:border-emerald-500"
+                className={`w-full bg-slate-50 border rounded-xl p-2.5 font-bold text-slate-900 focus:outline-hidden ${
+                  targetErrors.attendanceThreshold ? 'border-rose-400 bg-rose-50/20' : 'border-slate-200 focus:border-emerald-500'
+                }`}
               />
-              <span className="text-[11px] text-slate-400">Strict gate for certificate issuance (default 80%)</span>
+              {targetErrors.attendanceThreshold ? (
+                <p className="text-rose-600 font-semibold mt-1">⚠️ {targetErrors.attendanceThreshold}</p>
+              ) : (
+                <span className="text-[11px] text-slate-400">Strict gate for certificate issuance (default 80%)</span>
+              )}
             </div>
 
             <div>
-              <label className="font-semibold text-slate-700 block mb-1">Farmers Reached Target per School</label>
+              <label className="font-semibold text-slate-700 block mb-1">Farmers Reached Target per School *</label>
               <input
                 type="number"
+                min="10"
+                max="10000"
                 value={targets.targetFarmersPerSchool}
                 onChange={(e) => setTargets({ ...targets, targetFarmersPerSchool: Number(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-900 focus:outline-hidden focus:border-emerald-500"
+                className={`w-full bg-slate-50 border rounded-xl p-2.5 font-bold text-slate-900 focus:outline-hidden ${
+                  targetErrors.targetFarmers ? 'border-rose-400 bg-rose-50/20' : 'border-slate-200 focus:border-emerald-500'
+                }`}
               />
-              <span className="text-[11px] text-slate-400">Default: 1,500 farmers (50 per group)</span>
+              {targetErrors.targetFarmers ? (
+                <p className="text-rose-600 font-semibold mt-1">⚠️ {targetErrors.targetFarmers}</p>
+              ) : (
+                <span className="text-[11px] text-slate-400">Default: 1,500 farmers (50 per group)</span>
+              )}
             </div>
 
             <div>
-              <label className="font-semibold text-slate-700 block mb-1">Soil Samples Tested Target</label>
+              <label className="font-semibold text-slate-700 block mb-1">Soil Samples Tested Target *</label>
               <input
                 type="number"
+                min="10"
+                max="5000"
                 value={targets.targetSamplesPerSchool}
                 onChange={(e) => setTargets({ ...targets, targetSamplesPerSchool: Number(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-900 focus:outline-hidden focus:border-emerald-500"
+                className={`w-full bg-slate-50 border rounded-xl p-2.5 font-bold text-slate-900 focus:outline-hidden ${
+                  targetErrors.targetSamples ? 'border-rose-400 bg-rose-50/20' : 'border-slate-200 focus:border-emerald-500'
+                }`}
               />
-              <span className="text-[11px] text-slate-400">Default: 750 samples tested per school</span>
+              {targetErrors.targetSamples ? (
+                <p className="text-rose-600 font-semibold mt-1">⚠️ {targetErrors.targetSamples}</p>
+              ) : (
+                <span className="text-[11px] text-slate-400">Default: 750 samples tested per school</span>
+              )}
             </div>
 
             <div>
-              <label className="font-semibold text-slate-700 block mb-1">Awareness Campaigns per School</label>
+              <label className="font-semibold text-slate-700 block mb-1">Awareness Campaigns per School *</label>
               <input
                 type="number"
+                min="1"
+                max="200"
                 value={targets.targetCampaignsPerSchool}
                 onChange={(e) => setTargets({ ...targets, targetCampaignsPerSchool: Number(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-slate-900 focus:outline-hidden focus:border-emerald-500"
+                className={`w-full bg-slate-50 border rounded-xl p-2.5 font-bold text-slate-900 focus:outline-hidden ${
+                  targetErrors.targetCampaigns ? 'border-rose-400 bg-rose-50/20' : 'border-slate-200 focus:border-emerald-500'
+                }`}
               />
-              <span className="text-[11px] text-slate-400">Default: 30 awareness events</span>
+              {targetErrors.targetCampaigns ? (
+                <p className="text-rose-600 font-semibold mt-1">⚠️ {targetErrors.targetCampaigns}</p>
+              ) : (
+                <span className="text-[11px] text-slate-400">Default: 30 awareness events</span>
+              )}
             </div>
           </div>
 
+          {!isTargetsValid && (
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-1.5">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <span>Please resolve highlighted targets validation errors.</span>
+            </div>
+          )}
+
           <button
             type="submit"
-            className="px-6 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-xs"
+            disabled={!isTargetsValid}
+            className={`px-6 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shadow-xs ${
+              isTargetsValid
+                ? 'bg-emerald-700 hover:bg-emerald-800 text-white cursor-pointer'
+                : 'bg-slate-300 text-slate-500 cursor-not-allowed opacity-60'
+            }`}
           >
             <Save className="w-4 h-4" />
             Save Target Settings

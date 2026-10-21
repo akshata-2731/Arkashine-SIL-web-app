@@ -3,11 +3,7 @@ import {
   Sprout, 
   MapPin, 
   AlertCircle, 
-  Send, 
-  CheckCircle2, 
-  Users, 
-  Calendar,
-  MessageSquarePlus
+  Send
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { useAuth } from '../../context/AuthContext';
@@ -70,8 +66,11 @@ export const PartnerSupport: React.FC = () => {
               >
                 <div className="w-full sm:w-32 h-24 rounded-xl overflow-hidden bg-slate-100 shrink-0">
                   <img
-                    src="/assets/images/farmer-outreach.png"
+                    src="/assets/images/farmer-outreach.webp"
                     alt={cmp.title}
+                    width={128}
+                    height={96}
+                    loading="lazy"
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -114,7 +113,7 @@ export const PartnerSupport: React.FC = () => {
               <label className="font-semibold text-slate-700 block mb-1">Priority Level</label>
               <select
                 value={ticketSeverity}
-                onChange={(e) => setTicketSeverity(e.target.value as any)}
+                onChange={(e) => setTicketSeverity(e.target.value as 'low' | 'medium' | 'high')}
                 className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-medium"
               >
                 <option value="low">Low - General Query</option>

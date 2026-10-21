@@ -2,17 +2,9 @@ import React, { useState } from 'react';
 import { 
   Award, 
   Search, 
-  CheckCircle2, 
-  AlertTriangle, 
-  XCircle, 
-  Printer, 
-  Download, 
-  ShieldCheck, 
-  QrCode,
-  Users,
   Sparkles
 } from 'lucide-react';
-import { Student, School } from '../../types';
+import { Student } from '../../types';
 import { storageService } from '../../services/storageService';
 import { StatusChip } from '../../components/common/StatusChip';
 import { CertificateModal } from '../../components/certificate/CertificateModal';
@@ -175,10 +167,8 @@ export const ArkashineCertificates: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredStudents.map(stu => {
-                const isReady = stu.certificateStatus === 'Eligible' || stu.certificateStatus === 'Issued';
-                return (
-                  <tr key={stu.id} className="hover:bg-slate-50/70 transition-colors">
+              {filteredStudents.map(stu => (
+                <tr key={stu.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="p-3.5">
                       <div className="flex items-center gap-2.5">
                         <img
@@ -236,8 +226,7 @@ export const ArkashineCertificates: React.FC = () => {
                       </button>
                     </td>
                   </tr>
-                );
-              })}
+                ))}
             </tbody>
           </table>
         </div>

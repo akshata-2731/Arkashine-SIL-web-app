@@ -28,7 +28,7 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
     title: 'Introduction to Agriculture & Soil Science (Theory)',
     subtitle: 'The living foundation of planetary & farm health',
     allocatedHours: 18,
-    image: '/assets/images/module-agri-science.png',
+    image: '/assets/images/module-agri-science.webp',
     description: 'Theory Foundation: Foundational soil physics, chemistry, soil horizons, organic carbon dynamics, and regenerative agriculture principles.',
     assessmentType: 'Quiz',
     topics: [
@@ -72,7 +72,7 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
     title: 'Soil Sample Collection & Preparation (Practical)',
     subtitle: 'Precision sampling protocols from field to lab',
     allocatedHours: 18,
-    image: '/assets/images/module-sample-collection.png',
+    image: '/assets/images/module-sample-collection.webp',
     description: 'Hands-on Practical: Standardized auger sampling, zig-zag spatial field grids, GPS geotagging, composite quartering, and drying techniques.',
     assessmentType: 'Quiz + Field Assignment',
     topics: [
@@ -116,7 +116,7 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
     title: 'Soil Testing using SoiLENZ Device (Practical)',
     subtitle: 'Handheld spectroscopic & electrochemical rapid testing',
     allocatedHours: 18,
-    image: '/assets/images/module-soil-testing.png',
+    image: '/assets/images/module-soil-testing.webp',
     description: 'Hands-on Practical: Operating Arkashine’s proprietary SoiLENZ handheld digital device, sensor calibration, reagent reaction dishes, and instant telemetry.',
     assessmentType: 'Quiz + SoiLENZ Challenge',
     topics: [
@@ -160,7 +160,7 @@ export const CURRICULUM_MODULES: CurriculumModule[] = [
     title: 'Soil Health Reports & Farmer Advisory (Practical)',
     subtitle: 'Translating laboratory numbers into real farm prosperity',
     allocatedHours: 18,
-    image: '/assets/images/module-health-reports.png',
+    image: '/assets/images/module-health-reports.webp',
     description: 'Hands-on Practical: Interpreting soil health cards, nutrient deficiency diagnostics, organic vs chemical fertilizer balancing, and conducting village farmer advisory meetings.',
     assessmentType: 'Quiz + Capstone',
     topics: [

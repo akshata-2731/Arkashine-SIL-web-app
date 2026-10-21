@@ -5,10 +5,7 @@ import {
   FlaskConical, 
   Users, 
   MessageSquareQuote, 
-  Save, 
-  CheckCircle2, 
-  Calendar,
-  ChevronDown
+  Save
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { storageService } from '../../services/storageService';
@@ -23,7 +20,6 @@ export const PrincipalDailyLog: React.FC = () => {
       .filter(l => l.dayNumber <= school.currentDay)
       .sort((a, b) => b.dayNumber - a.dayNumber)
   );
-
   const [remarksState, setRemarksState] = useState<Record<string, string>>({});
   const [savedNotice, setSavedNotice] = useState<string | null>(null);
 
@@ -37,6 +33,7 @@ export const PrincipalDailyLog: React.FC = () => {
 
     log.principalRemarks = remark;
     storageService.saveDailyLog(log, currentUser.name);
+    setLogs(prev => prev.map(l => l.id === log.id ? { ...l, principalRemarks: remark } : l));
 
     storageService.addAuditLog({
       id: `AUD-${Date.now()}`,

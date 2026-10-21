@@ -3,12 +3,7 @@ import {
   FlaskConical, 
   Plus, 
   Search, 
-  Filter, 
-  CheckCircle2, 
-  FileCheck2, 
-  Save, 
-  Sparkles,
-  MapPin
+  FileCheck2 
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { storageService } from '../../services/storageService';
@@ -28,9 +23,9 @@ export const FacultySoilLab: React.FC = () => {
   const [pH, setPH] = useState<number>(7.2);
   const [ec, setEC] = useState<number>(0.65);
   const [oc, setOC] = useState<number>(0.82);
-  const [nitrogen, setNitrogen] = useState<number>(240);
-  const [phosphorus, setPhosphorus] = useState<number>(24);
-  const [potassium, setPotassium] = useState<number>(260);
+  const nitrogen = 240;
+  const phosphorus = 24;
+  const potassium = 260;
 
   const handleAddSample = (e: React.FormEvent) => {
     e.preventDefault();

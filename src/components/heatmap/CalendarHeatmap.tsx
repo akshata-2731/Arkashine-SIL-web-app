@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
 import { 
-  CalendarDays, 
-  Filter, 
-  HelpCircle, 
-  Clock, 
-  CheckCircle2, 
-  AlertTriangle, 
-  XCircle, 
   Info,
-  ChevronRight
+  ChevronRight,
+  CalendarDays
 } from 'lucide-react';
-import { School, DailyLog, Role } from '../../types';
+import { School, Role } from '../../types';
 import { storageService } from '../../services/storageService';
 import { DayHistoryDrawer } from './DayHistoryDrawer';
 
@@ -25,13 +19,12 @@ interface CalendarHeatmapProps {
 
 export const CalendarHeatmap: React.FC<CalendarHeatmapProps> = ({
   schools,
-  role = 'arkashine',
+  role: _role = 'arkashine',
   singleSchoolId,
   onSelectSchoolTimeline
 }) => {
   const [metric, setMetric] = useState<HeatmapMetric>('updates');
   const [selectedWeek, setSelectedWeek] = useState<number | 'all'>('all');
-  const [selectedPartner, setSelectedPartner] = useState<string>('all');
   const [activeCell, setActiveCell] = useState<{ schoolId: string; day: number } | null>(null);
   const [hoveredCell, setHoveredCell] = useState<{ schoolId: string; day: number; summary: string } | null>(null);
 
@@ -39,7 +32,6 @@ export const CalendarHeatmap: React.FC<CalendarHeatmapProps> = ({
   const visibleSchools = schools.filter(s => {
     if (singleSchoolId) return s.id === singleSchoolId;
     if (s.status !== 'Running' && s.status !== 'Completed') return false;
-    if (selectedPartner !== 'all' && s.partnerId !== selectedPartner) return false;
     return true;
   });
 
@@ -313,7 +305,10 @@ export const CalendarHeatmap: React.FC<CalendarHeatmapProps> = ({
                         onClick={() => setActiveCell({ schoolId: school.id, day })}
                         onMouseEnter={() => setHoveredCell({ schoolId: school.id, day, summary: cell.summary })}
                         onMouseLeave={() => setHoveredCell(null)}
-                        className={`w-7 h-7 rounded-md ${cell.bg} flex items-center justify-center mx-auto text-[10px] font-bold transition-transform active:scale-90 shadow-2xs`}
+                        onFocus={() => setHoveredCell({ schoolId: school.id, day, summary: cell.summary })}
+                        onBlur={() => setHoveredCell(null)}
+                        className={`w-7 h-7 rounded-md ${cell.bg} flex items-center justify-center mx-auto text-[10px] font-bold transition-transform active:scale-90 shadow-2xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-1 cursor-pointer`}
+                        aria-label={`${school.name}, Day ${day}: ${cell.label}. ${cell.summary}`}
                         title={cell.summary}
                       >
                         {day}

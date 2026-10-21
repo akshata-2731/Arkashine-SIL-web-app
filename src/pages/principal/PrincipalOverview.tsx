@@ -5,9 +5,7 @@ import {
   FlaskConical, 
   Sprout, 
   CheckCircle2, 
-  AlertTriangle, 
-  ChevronRight, 
-  Calendar
+  AlertTriangle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { storageService } from '../../services/storageService';
@@ -102,8 +100,11 @@ export const PrincipalOverview: React.FC<PrincipalOverviewProps> = ({
         </div>
         <div className="w-full md:w-64 h-40 md:h-full bg-slate-100 overflow-hidden shrink-0 border-t md:border-t-0 md:border-l border-slate-100">
           <img
-            src="/assets/images/hero-banner.png"
+            src="/assets/images/hero-banner.webp"
             alt="School lab testing soil"
+            width={256}
+            height={160}
+            loading="lazy"
             className="w-full h-full object-cover"
           />
         </div>

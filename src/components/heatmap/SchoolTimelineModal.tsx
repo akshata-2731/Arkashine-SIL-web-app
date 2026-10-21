@@ -1,8 +1,7 @@
-import React from 'react';
-import { X, Calendar, Clock, FlaskConical, Users, ArrowUpDown, ChevronDown } from 'lucide-react';
-import { School, DailyLog } from '../../types';
+import { X, Clock, FlaskConical, Users } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { StatusChip } from '../common/StatusChip';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface SchoolTimelineModalProps {
   schoolId: string | null;
@@ -15,6 +14,8 @@ export const SchoolTimelineModal: React.FC<SchoolTimelineModalProps> = ({
   onClose,
   onSelectDay
 }) => {
+  const { containerRef } = useModalA11y({ isOpen: Boolean(schoolId), onClose });
+
   if (!schoolId) return null;
 
   const school = storageService.getSchool(schoolId);
@@ -23,15 +24,24 @@ export const SchoolTimelineModal: React.FC<SchoolTimelineModalProps> = ({
     .sort((a, b) => b.dayNumber - a.dayNumber); // Newest first
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+    <div 
+      className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="timeline-modal-title"
+    >
+      <div 
+        ref={containerRef}
+        tabIndex={-1}
+        className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh] focus:outline-hidden"
+      >
         {/* Header */}
         <div className="p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
           <div>
             <span className="text-xs font-semibold text-emerald-800 uppercase tracking-wider">
               Complete School Log Timeline
             </span>
-            <h3 className="text-base font-bold text-slate-900 mt-0.5">
+            <h3 id="timeline-modal-title" className="text-base font-bold text-slate-900 mt-0.5">
               {school?.name}
             </h3>
             <p className="text-xs text-slate-500">
@@ -40,7 +50,8 @@ export const SchoolTimelineModal: React.FC<SchoolTimelineModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors"
+            aria-label="Close timeline dialog"
           >
             <X className="w-5 h-5" />
           </button>

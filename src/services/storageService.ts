@@ -1,167 +1,175 @@
 import { 
   School, Partner, Student, DailyLog, SoilSample, 
-  FarmerOutreach, Campaign, Certificate, BudgetLine, 
+  FarmerOutreach, Campaign, BudgetLine, 
   InventoryItem, AuditLog, NotificationItem, ProgramTargets,
-  Role, ChecklistItem, EligibilityResult
+  Role, ChecklistItem
 } from '../types';
+import { storageCore, STORAGE_KEYS } from './storage/storageCore';
+import { schoolStorage } from './storage/schoolStorage';
+import { partnerStorage } from './storage/partnerStorage';
+import { studentStorage } from './storage/studentStorage';
+import { dailyLogStorage } from './storage/dailyLogStorage';
+import { soilSampleStorage } from './storage/soilSampleStorage';
+import { outreachStorage } from './storage/outreachStorage';
+import { budgetInventoryStorage } from './storage/budgetInventoryStorage';
+import { auditNotificationStorage } from './storage/auditNotificationStorage';
 import { 
   SEED_SCHOOLS, SEED_PARTNERS, DEFAULT_PROGRAM_TARGETS,
   generateStudentsForSchool, generateDailyLogsForSchool,
   generateSoilSamples, generateFarmerOutreach, generateCampaigns,
-  generateInventory, generateAuditLogs, generateNotifications 
+  generateInventory, generateAuditLogs, generateNotifications
 } from '../data/seedData';
 import { INITIAL_BUDGET_LINES } from '../data/budgetData';
 
-const STORAGE_KEYS = {
-  SCHOOLS: 'arkashine_schools_v1',
-  PARTNERS: 'arkashine_partners_v1',
-  STUDENTS: 'arkashine_students_v1',
-  DAILY_LOGS: 'arkashine_daily_logs_v1',
-  SOIL_SAMPLES: 'arkashine_soil_samples_v1',
-  OUTREACH: 'arkashine_outreach_v1',
-  CAMPAIGNS: 'arkashine_campaigns_v1',
-  BUDGET: 'arkashine_budget_v1',
-  INVENTORY: 'arkashine_inventory_v1',
-  AUDIT_LOGS: 'arkashine_audit_v1',
-  NOTIFICATIONS: 'arkashine_notifications_v1',
-  TARGETS: 'arkashine_targets_v1',
-  CURRENT_USER: 'arkashine_current_user_v1',
-  DRAFT_DAILY_LOG: 'arkashine_draft_daily_log_v1'
-};
+export class StorageService {
+  public init(): void {
+    if (storageCore.getInitialized()) return;
+    storageCore.setInitialized(true);
 
-class StorageService {
-  private isInitialized = false;
+    storageCore.runMigrations();
 
-  public init() {
-    if (this.isInitialized) return;
-
+    // Check if initial seeding needed
     if (!localStorage.getItem(STORAGE_KEYS.SCHOOLS)) {
       this.resetAllData();
     }
-    this.isInitialized = true;
   }
 
-  public resetAllData() {
-    localStorage.setItem(STORAGE_KEYS.SCHOOLS, JSON.stringify(SEED_SCHOOLS));
-    localStorage.setItem(STORAGE_KEYS.PARTNERS, JSON.stringify(SEED_PARTNERS));
-    localStorage.setItem(STORAGE_KEYS.TARGETS, JSON.stringify(DEFAULT_PROGRAM_TARGETS));
-    localStorage.setItem(STORAGE_KEYS.BUDGET, JSON.stringify(INITIAL_BUDGET_LINES));
-    localStorage.setItem(STORAGE_KEYS.SOIL_SAMPLES, JSON.stringify(generateSoilSamples()));
-    localStorage.setItem(STORAGE_KEYS.OUTREACH, JSON.stringify(generateFarmerOutreach()));
-    localStorage.setItem(STORAGE_KEYS.CAMPAIGNS, JSON.stringify(generateCampaigns()));
-    localStorage.setItem(STORAGE_KEYS.INVENTORY, JSON.stringify(generateInventory()));
-    localStorage.setItem(STORAGE_KEYS.AUDIT_LOGS, JSON.stringify(generateAuditLogs()));
-    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(generateNotifications()));
+  public resetAllData(): void {
+    storageCore.clearCache();
 
-    // Generate students for running and lab setup schools
-    const allStudents: Student[] = [];
-    for (const school of SEED_SCHOOLS) {
-      if (school.status === 'Running' || school.status === 'Lab_Setup') {
-        const count = school.id === 'SCH-02' ? 19 : (school.id === 'SCH-03' ? 17 : 18);
-        const schoolStudents = generateStudentsForSchool(school.id, count);
-        allStudents.push(...schoolStudents);
-      }
-    }
-    localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(allStudents));
+    // Reset schools
+    storageCore.safeWrite(STORAGE_KEYS.SCHOOLS, SEED_SCHOOLS);
 
-    // Generate daily logs for running schools
-    const allLogs: DailyLog[] = [];
-    for (const school of SEED_SCHOOLS) {
-      if (school.status === 'Running') {
-        allLogs.push(...generateDailyLogsForSchool(school, 28));
+    // Reset partners
+    storageCore.safeWrite(STORAGE_KEYS.PARTNERS, SEED_PARTNERS);
+
+    // Reset students
+    const initialStudents: Student[] = [];
+    ['SCH-01', 'SCH-02', 'SCH-03'].forEach(sId => {
+      initialStudents.push(...generateStudentsForSchool(sId, 18));
+    });
+    storageCore.safeWrite(STORAGE_KEYS.STUDENTS, initialStudents);
+
+    // Reset daily logs
+    const initialLogs: DailyLog[] = [];
+    SEED_SCHOOLS.forEach(sch => {
+      if (sch.status === 'Running') {
+        initialLogs.push(...generateDailyLogsForSchool(sch, 28));
       }
-    }
-    localStorage.setItem(STORAGE_KEYS.DAILY_LOGS, JSON.stringify(allLogs));
+    });
+    storageCore.safeWrite(STORAGE_KEYS.DAILY_LOGS, initialLogs);
+
+    // Reset samples, outreach, inventory, budget, logs
+    storageCore.safeWrite(STORAGE_KEYS.SOIL_SAMPLES, generateSoilSamples());
+    storageCore.safeWrite(STORAGE_KEYS.OUTREACH, generateFarmerOutreach());
+    storageCore.safeWrite(STORAGE_KEYS.CAMPAIGNS, generateCampaigns());
+    storageCore.safeWrite(STORAGE_KEYS.BUDGET, INITIAL_BUDGET_LINES);
+    storageCore.safeWrite(STORAGE_KEYS.INVENTORY, generateInventory());
+    storageCore.safeWrite(STORAGE_KEYS.AUDIT_LOGS, generateAuditLogs());
+    storageCore.safeWrite(STORAGE_KEYS.NOTIFICATIONS, generateNotifications());
+    storageCore.safeWrite(STORAGE_KEYS.TARGETS, DEFAULT_PROGRAM_TARGETS);
+    storageCore.safeRemove(STORAGE_KEYS.DRAFT_DAILY_LOG);
+
+    storageCore.notify();
+  }
+
+  public runMigrations(): void {
+    storageCore.runMigrations();
+  }
+
+  public clearCache(): void {
+    storageCore.clearCache();
   }
 
   // --- SCHOOLS ---
   public getSchools(): School[] {
     this.init();
-    const data = localStorage.getItem(STORAGE_KEYS.SCHOOLS);
-    return data ? JSON.parse(data) : [];
+    return schoolStorage.getSchools();
   }
 
   public getSchool(id: string): School | undefined {
-    return this.getSchools().find(s => s.id === id);
+    this.init();
+    return schoolStorage.getSchool(id);
   }
 
-  public saveSchool(school: School): void {
-    const list = this.getSchools();
-    const idx = list.findIndex(s => s.id === school.id);
-    if (idx >= 0) {
-      list[idx] = school;
-    } else {
-      list.push(school);
-    }
-    localStorage.setItem(STORAGE_KEYS.SCHOOLS, JSON.stringify(list));
+  public saveSchool(school: School): School {
+    this.init();
+    return schoolStorage.saveSchool(school);
   }
 
   // --- PARTNERS ---
   public getPartners(): Partner[] {
     this.init();
-    const data = localStorage.getItem(STORAGE_KEYS.PARTNERS);
-    return data ? JSON.parse(data) : [];
+    return partnerStorage.getPartners();
   }
 
   public getPartner(id: string): Partner | undefined {
-    return this.getPartners().find(p => p.id === id);
+    this.init();
+    return partnerStorage.getPartner(id);
+  }
+
+  public savePartner(partner: Partner): Partner {
+    this.init();
+    return partnerStorage.savePartner(partner);
   }
 
   // --- STUDENTS ---
   public getStudents(schoolId?: string): Student[] {
     this.init();
-    const data = localStorage.getItem(STORAGE_KEYS.STUDENTS);
-    const list: Student[] = data ? JSON.parse(data) : [];
-    return schoolId ? list.filter(s => s.schoolId === schoolId) : list;
+    return studentStorage.getStudents(schoolId);
   }
 
   public getStudent(id: string): Student | undefined {
-    return this.getStudents().find(s => s.id === id);
+    this.init();
+    return studentStorage.getStudent(id);
   }
 
-  public saveStudent(student: Student): void {
-    const list = this.getStudents();
-    const idx = list.findIndex(s => s.id === student.id);
-    if (idx >= 0) {
-      list[idx] = student;
-    } else {
-      list.push(student);
+  public saveStudent(student: Student): Student {
+    this.init();
+    return studentStorage.saveStudent(student);
+  }
+
+  public issueCertificate(studentId: string, actorName: string = 'Arkashine Super Admin'): { success: boolean; message: string; student?: Student } {
+    this.init();
+    const res = studentStorage.issueCertificate(studentId, actorName);
+    if (res.success && res.student) {
+      this.addAuditLog({
+        id: `AUD-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        actorName,
+        actorRole: 'arkashine',
+        action: 'CERTIFICATE_ISSUED',
+        details: `Issued Soil Partner Certificate ${res.student.certificateId} for ${res.student.name} (${res.student.rollNo})`,
+        schoolId: res.student.schoolId
+      });
     }
-    localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(list));
+    return res;
+  }
+
+  public bulkIssueEligibleCertificates(schoolId: string, actorName: string = 'Arkashine Super Admin'): { count: number; message: string } {
+    this.init();
+    return studentStorage.bulkIssueEligibleCertificates(schoolId, actorName);
+  }
+
+  public getStudentByVerificationHash(hash: string): { student: Student; school?: School } | null {
+    this.init();
+    return studentStorage.getStudentByVerificationHash(hash);
   }
 
   // --- DAILY LOGS ---
   public getDailyLogs(schoolId?: string): DailyLog[] {
     this.init();
-    const data = localStorage.getItem(STORAGE_KEYS.DAILY_LOGS);
-    const list: DailyLog[] = data ? JSON.parse(data) : [];
-    return schoolId ? list.filter(l => l.schoolId === schoolId) : list;
+    return dailyLogStorage.getDailyLogs(schoolId);
   }
 
   public getDailyLog(schoolId: string, dayNumber: number): DailyLog | undefined {
-    return this.getDailyLogs(schoolId).find(l => l.dayNumber === dayNumber);
+    this.init();
+    return dailyLogStorage.getDailyLog(schoolId, dayNumber);
   }
 
-  public saveDailyLog(log: DailyLog, actorName: string = 'Faculty'): void {
-    const list = this.getDailyLogs();
-    const idx = list.findIndex(l => l.id === log.id || (l.schoolId === log.schoolId && l.dayNumber === log.dayNumber));
-    if (idx >= 0) {
-      list[idx] = log;
-    } else {
-      list.push(log);
-    }
-    localStorage.setItem(STORAGE_KEYS.DAILY_LOGS, JSON.stringify(list));
-
-    // Recalculate school metrics
-    const schoolLogs = list.filter(l => l.schoolId === log.schoolId && l.status !== 'Missing');
-    const school = this.getSchool(log.schoolId);
-    if (school) {
-      if (log.dayNumber > school.currentDay) {
-        school.currentDay = log.dayNumber;
-        this.saveSchool(school);
-      }
-    }
-
+  public saveDailyLog(log: DailyLog, actorName: string = 'Faculty'): DailyLog {
+    this.init();
+    const saved = dailyLogStorage.saveDailyLog(log, actorName);
     this.addAuditLog({
       id: `AUD-${Date.now()}`,
       timestamp: new Date().toISOString(),
@@ -171,207 +179,126 @@ class StorageService {
       details: `Saved Day ${log.dayNumber} log for ${log.schoolId} (${log.hoursTaught} hrs taught).`,
       schoolId: log.schoolId
     });
+    return saved;
   }
 
-  // --- DRAFT DAILY LOG (for offline resilience) ---
   public getDraftDailyLog(): Partial<DailyLog> | null {
-    const data = localStorage.getItem(STORAGE_KEYS.DRAFT_DAILY_LOG);
-    return data ? JSON.parse(data) : null;
+    this.init();
+    return dailyLogStorage.getDraftDailyLog();
   }
 
   public saveDraftDailyLog(draft: Partial<DailyLog>): void {
-    localStorage.setItem(STORAGE_KEYS.DRAFT_DAILY_LOG, JSON.stringify(draft));
+    this.init();
+    dailyLogStorage.saveDraftDailyLog(draft);
   }
 
   public clearDraftDailyLog(): void {
-    localStorage.removeItem(STORAGE_KEYS.DRAFT_DAILY_LOG);
+    this.init();
+    dailyLogStorage.clearDraftDailyLog();
   }
 
   // --- SOIL SAMPLES ---
   public getSoilSamples(schoolId?: string): SoilSample[] {
     this.init();
-    const data = localStorage.getItem(STORAGE_KEYS.SOIL_SAMPLES);
-    const list: SoilSample[] = data ? JSON.parse(data) : [];
-    return schoolId ? list.filter(s => s.schoolId === schoolId) : list;
+    return soilSampleStorage.getSoilSamples(schoolId);
   }
 
-  public saveSoilSample(sample: SoilSample): void {
-    const list = this.getSoilSamples();
-    const idx = list.findIndex(s => s.id === sample.id);
-    if (idx >= 0) {
-      list[idx] = sample;
-    } else {
-      list.unshift(sample);
-    }
-    localStorage.setItem(STORAGE_KEYS.SOIL_SAMPLES, JSON.stringify(list));
+  public saveSoilSample(sample: SoilSample): SoilSample {
+    this.init();
+    return soilSampleStorage.saveSoilSample(sample);
   }
 
-  // --- FARMER OUTREACH & CAMPAIGNS ---
+  // --- OUTREACH & CAMPAIGNS ---
   public getFarmerOutreach(schoolId?: string): FarmerOutreach[] {
     this.init();
-    const data = localStorage.getItem(STORAGE_KEYS.OUTREACH);
-    const list: FarmerOutreach[] = data ? JSON.parse(data) : [];
-    return schoolId ? list.filter(o => o.schoolId === schoolId) : list;
+    return outreachStorage.getFarmerOutreach(schoolId);
   }
 
-  public saveFarmerOutreach(item: FarmerOutreach): void {
-    const list = this.getFarmerOutreach();
-    list.unshift(item);
-    localStorage.setItem(STORAGE_KEYS.OUTREACH, JSON.stringify(list));
+  public saveFarmerOutreach(item: FarmerOutreach): FarmerOutreach {
+    this.init();
+    return outreachStorage.saveFarmerOutreach(item);
   }
 
   public getCampaigns(schoolId?: string): Campaign[] {
     this.init();
-    const data = localStorage.getItem(STORAGE_KEYS.CAMPAIGNS);
-    const list: Campaign[] = data ? JSON.parse(data) : [];
-    return schoolId ? list.filter(c => c.schoolId === schoolId) : list;
+    return outreachStorage.getCampaigns(schoolId);
   }
 
-  public saveCampaign(item: Campaign): void {
-    const list = this.getCampaigns();
-    list.unshift(item);
-    localStorage.setItem(STORAGE_KEYS.CAMPAIGNS, JSON.stringify(list));
+  public saveCampaign(item: Campaign): Campaign {
+    this.init();
+    return outreachStorage.saveCampaign(item);
   }
 
   // --- BUDGET & INVENTORY ---
   public getBudgetLines(): BudgetLine[] {
     this.init();
-    const data = localStorage.getItem(STORAGE_KEYS.BUDGET);
-    return data ? JSON.parse(data) : [];
+    return budgetInventoryStorage.getBudgetLines();
   }
 
-  public saveBudgetLine(line: BudgetLine): void {
-    const list = this.getBudgetLines();
-    const idx = list.findIndex(b => b.id === line.id);
-    if (idx >= 0) {
-      list[idx] = line;
-      localStorage.setItem(STORAGE_KEYS.BUDGET, JSON.stringify(list));
-    }
+  public saveBudgetLine(line: BudgetLine): BudgetLine {
+    this.init();
+    return budgetInventoryStorage.saveBudgetLine(line);
   }
 
   public getInventory(schoolId?: string): InventoryItem[] {
     this.init();
-    const data = localStorage.getItem(STORAGE_KEYS.INVENTORY);
-    const list: InventoryItem[] = data ? JSON.parse(data) : [];
-    return schoolId ? list.filter(i => i.schoolId === schoolId) : list;
+    return budgetInventoryStorage.getInventory(schoolId);
   }
 
-  public saveInventory(item: InventoryItem): void {
-    const list = this.getInventory();
-    const idx = list.findIndex(i => i.id === item.id);
-    if (idx >= 0) {
-      list[idx] = item;
-      localStorage.setItem(STORAGE_KEYS.INVENTORY, JSON.stringify(list));
-    }
+  public saveInventory(item: InventoryItem): InventoryItem {
+    this.init();
+    return budgetInventoryStorage.saveInventory(item);
+  }
+
+  public getProgramTargets(): ProgramTargets {
+    this.init();
+    return budgetInventoryStorage.getProgramTargets();
+  }
+
+  public saveProgramTargets(targets: ProgramTargets): ProgramTargets {
+    this.init();
+    return budgetInventoryStorage.saveProgramTargets(targets);
   }
 
   // --- AUDIT & NOTIFICATIONS ---
   public getAuditLogs(): AuditLog[] {
     this.init();
-    const data = localStorage.getItem(STORAGE_KEYS.AUDIT_LOGS);
-    return data ? JSON.parse(data) : [];
+    return auditNotificationStorage.getAuditLogs();
   }
 
-  public addAuditLog(log: AuditLog): void {
-    const list = this.getAuditLogs();
-    list.unshift(log);
-    localStorage.setItem(STORAGE_KEYS.AUDIT_LOGS, JSON.stringify(list.slice(0, 100)));
+  public addAuditLog(log: AuditLog): AuditLog {
+    this.init();
+    return auditNotificationStorage.addAuditLog(log);
   }
 
   public getNotifications(role?: Role): NotificationItem[] {
     this.init();
-    const data = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
-    const list: NotificationItem[] = data ? JSON.parse(data) : [];
-    return role ? list.filter(n => n.roleScope.includes(role)) : list;
+    return auditNotificationStorage.getNotifications(role);
   }
 
   public markNotificationRead(id: string): void {
-    const list = this.getNotifications();
-    const item = list.find(n => n.id === id);
-    if (item) {
-      item.read = true;
-      localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(list));
-    }
-  }
-
-  // --- TARGETS ---
-  public getProgramTargets(): ProgramTargets {
     this.init();
-    const data = localStorage.getItem(STORAGE_KEYS.TARGETS);
-    return data ? JSON.parse(data) : DEFAULT_PROGRAM_TARGETS;
+    auditNotificationStorage.markNotificationRead(id);
   }
 
-  public saveProgramTargets(targets: ProgramTargets): void {
-    localStorage.setItem(STORAGE_KEYS.TARGETS, JSON.stringify(targets));
-  }
-
-  // --- STRICT ELIGIBILITY WORKFLOW ---
+  // --- ELIGIBILITY & ENROLLMENT ---
   public updateSchoolEligibilityCheck(schoolId: string, items: ChecklistItem[], evaluator: string): School {
-    const school = this.getSchool(schoolId);
-    if (!school) throw new Error(`School not found: ${schoolId}`);
-
-    const total = items.length;
-    const yesCount = items.filter(i => i.status === 'yes').length;
-    const needsFixCount = items.filter(i => i.status === 'needs_fix').length;
-    const noCount = items.filter(i => i.status === 'no').length;
-
-    // Weight score: Yes = 100%, Needs Fix = 50%, No = 0%
-    const score = Math.round(((yesCount * 1.0 + needsFixCount * 0.5) / total) * 100);
-
-    let result: EligibilityResult = 'Eligible';
-    const conditions: string[] = [];
-    const rejections: string[] = [];
-
-    if (noCount > 0 || score < 60) {
-      result = 'Not_Eligible';
-      items.filter(i => i.status === 'no').forEach(i => {
-        rejections.push(`Critical requirement missing: ${i.label}. ${i.notes || ''}`);
-      });
-    } else if (needsFixCount > 0 || score < 85) {
-      result = 'Eligible_With_Conditions';
-      items.filter(i => i.status === 'needs_fix').forEach(i => {
-        conditions.push(`Fix required: ${i.label} (Deadline: ${i.fixDeadline || 'Before Cohort Start'})`);
-      });
-    } else {
-      result = 'Eligible';
-    }
-
-    school.eligibility = {
-      score,
-      result,
-      evaluatedAt: new Date().toISOString(),
-      evaluatedBy: evaluator,
-      conditionsList: conditions,
-      rejectionReasons: rejections,
-      items
-    };
-
-    if (result === 'Not_Eligible') {
-      school.status = 'Not_Eligible';
-      school.healthStatus = 'critical';
-    } else if (result === 'Eligible' && school.status === 'Eligibility_Check') {
-      school.status = 'Approved';
-      school.healthStatus = 'healthy';
-    } else if (result === 'Eligible_With_Conditions') {
-      school.healthStatus = 'attention';
-    }
-
-    this.saveSchool(school);
-
+    this.init();
+    const school = schoolStorage.updateSchoolEligibilityCheck(schoolId, items, evaluator);
     this.addAuditLog({
       id: `AUD-${Date.now()}`,
       timestamp: new Date().toISOString(),
       actorName: evaluator,
       actorRole: 'partner',
       action: 'ELIGIBILITY_EVALUATION',
-      details: `Evaluated ${school.name}: Score ${score}%, Result: ${result}`,
+      details: `Evaluated ${school.name}: Score ${school.eligibility.score}%, Result: ${school.eligibility.result}`,
       schoolId: school.id
     });
-
     return school;
   }
 
   public enrollSchool(schoolId: string, actorName: string = 'Arkashine Admin'): { success: boolean; message: string } {
+    this.init();
     const school = this.getSchool(schoolId);
     if (!school) return { success: false, message: 'School not found' };
 
@@ -389,23 +316,20 @@ class StorageService {
       };
     }
 
-    // Advance pipeline
     if (school.status === 'Approved' || school.status === 'Lab_Setup') {
       school.status = 'Enrolled';
     } else if (school.status === 'Enrolled') {
       school.status = 'Running';
       school.currentDay = 1;
-      // Generate cohort if not exists
       if (this.getStudents(schoolId).length === 0) {
         const students = generateStudentsForSchool(schoolId, 18);
         const existing = this.getStudents();
-        localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify([...existing, ...students]));
+        storageCore.safeWrite(STORAGE_KEYS.STUDENTS, [...existing, ...students]);
       }
-      // Generate day logs if not exists
       if (this.getDailyLogs(schoolId).length === 0) {
         const logs = generateDailyLogsForSchool(school, 28);
         const existingLogs = this.getDailyLogs();
-        localStorage.setItem(STORAGE_KEYS.DAILY_LOGS, JSON.stringify([...existingLogs, ...logs]));
+        storageCore.safeWrite(STORAGE_KEYS.DAILY_LOGS, [...existingLogs, ...logs]);
       }
     }
 
@@ -422,79 +346,7 @@ class StorageService {
 
     return { success: true, message: `School successfully moved to ${school.status}` };
   }
-
-  // --- STRICT CERTIFICATE GATING ---
-  public issueCertificate(studentId: string, actorName: string = 'Arkashine Super Admin'): { success: boolean; message: string; student?: Student } {
-    const student = this.getStudent(studentId);
-    if (!student) return { success: false, message: 'Student record not found' };
-
-    const targets = this.getProgramTargets();
-    const missing: string[] = [];
-
-    if (student.attendanceRate < targets.attendanceThreshold) {
-      missing.push(`Attendance rate of ${student.attendanceRate}% is below the required ${targets.attendanceThreshold}%`);
-    }
-    if (student.modulesCompleted < 4) {
-      missing.push(`Has completed only ${student.modulesCompleted}/4 curriculum modules`);
-    }
-    if (student.practicalsDone < 6) {
-      missing.push(`Has completed only ${student.practicalsDone}/6 mandatory SoiLENZ laboratory practicals`);
-    }
-    if (!student.capstoneSubmitted) {
-      missing.push('Capstone soil health presentation has not been submitted or approved');
-    }
-
-    if (missing.length > 0) {
-      student.certificateStatus = 'Incomplete_Data';
-      student.missingFields = missing;
-      this.saveStudent(student);
-      return { 
-        success: false, 
-        message: `Certificate blocked due to incomplete requirements:\n• ${missing.join('\n• ')}` 
-      };
-    }
-
-    student.certificateStatus = 'Issued';
-    student.certificateId = `CERT-${student.schoolId}-${student.rollNo.replace('SIL-2026-', '')}`;
-    student.verifiedQrHash = `ark-sil-${student.schoolId.toLowerCase()}-${student.rollNo.replace('SIL-2026-', '')}`;
-    if (!student.badgeIds.includes('badge-ambassador')) {
-      student.badgeIds.push('badge-ambassador');
-    }
-
-    this.saveStudent(student);
-    this.addAuditLog({
-      id: `AUD-${Date.now()}`,
-      timestamp: new Date().toISOString(),
-      actorName,
-      actorRole: 'arkashine',
-      action: 'CERTIFICATE_ISSUED',
-      details: `Issued Soil Partner Certificate ${student.certificateId} for ${student.name} (${student.rollNo})`,
-      schoolId: student.schoolId
-    });
-
-    return { 
-      success: true, 
-      message: `Certificate ${student.certificateId} successfully issued for ${student.name}!`,
-      student 
-    };
-  }
-
-  public bulkIssueEligibleCertificates(schoolId: string, actorName: string = 'Arkashine Super Admin'): { count: number; message: string } {
-    const students = this.getStudents(schoolId);
-    let count = 0;
-
-    for (const stu of students) {
-      if (stu.certificateStatus === 'Eligible') {
-        const res = this.issueCertificate(stu.id, actorName);
-        if (res.success) count++;
-      }
-    }
-
-    return {
-      count,
-      message: `Successfully issued certificates for ${count} eligible students.`
-    };
-  }
 }
 
 export const storageService = new StorageService();
+export * from './storage/useStorage';

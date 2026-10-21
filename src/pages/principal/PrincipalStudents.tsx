@@ -2,12 +2,7 @@ import React, { useState } from 'react';
 import { 
   Users, 
   AlertTriangle, 
-  CheckCircle2, 
-  Search, 
-  Award, 
-  FlaskConical, 
-  Clock, 
-  Phone
+  Search
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { storageService } from '../../services/storageService';
@@ -49,18 +44,31 @@ export const PrincipalStudents: React.FC = () => {
           </p>
         </div>
 
-        {/* At-risk toggle button */}
-        <button
-          onClick={() => setFilterAtRisk(!filterAtRisk)}
-          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-xs ${
-            filterAtRisk
-              ? 'bg-rose-600 text-white'
-              : 'bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100'
-          }`}
-        >
-          <AlertTriangle className="w-4 h-4" />
-          {filterAtRisk ? 'Showing At-Risk Only' : `Highlight At-Risk Students (${atRiskStudents.length})`}
-        </button>
+        {/* Controls: Search + At-risk toggle */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search student..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-emerald-700 text-slate-800"
+            />
+          </div>
+
+          <button
+            onClick={() => setFilterAtRisk(!filterAtRisk)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-xs ${
+              filterAtRisk
+                ? 'bg-rose-600 text-white'
+                : 'bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100'
+            }`}
+          >
+            <AlertTriangle className="w-4 h-4" />
+            {filterAtRisk ? 'Showing At-Risk Only' : `Highlight At-Risk Students (${atRiskStudents.length})`}
+          </button>
+        </div>
       </div>
 
       {/* Student Cards Grid with Progress Rings */}

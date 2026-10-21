@@ -3,9 +3,7 @@ import {
   School as SchoolIcon, 
   Users, 
   Sprout, 
-  Clock, 
-  ChevronRight,
-  ShieldCheck
+  Clock
 } from 'lucide-react';
 import { KpiCard } from '../../components/common/KpiCard';
 import { StatusChip } from '../../components/common/StatusChip';

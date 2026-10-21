@@ -52,6 +52,26 @@
   color: var(--theme-accent, #10B981) !important;
 }
 
+.text-theme-primary {
+  color: var(--theme-primary, #143D30) !important;
+}
+
+.bg-theme-primary {
+  background-color: var(--theme-primary, #143D30) !important;
+}
+
+.bg-theme-primary-dark {
+  background-color: var(--theme-primary-dark, #0E2C23) !important;
+}
+
+.bg-theme-accent {
+  background-color: var(--theme-accent, #10B981) !important;
+}
+
+.border-theme-accent {
+  border-color: var(--theme-accent, #10B981) !important;
+}
+
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

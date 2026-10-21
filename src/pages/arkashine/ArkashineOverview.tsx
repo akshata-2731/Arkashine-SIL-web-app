@@ -5,10 +5,7 @@ import {
   Award, 
   Sprout, 
   AlertTriangle, 
-  ChevronRight, 
-  MapPin, 
-  ArrowUpRight,
-  ShieldAlert
+  ChevronRight
 } from 'lucide-react';
 import { KpiCard } from '../../components/common/KpiCard';
 import { StatusChip } from '../../components/common/StatusChip';
@@ -69,8 +66,11 @@ export const ArkashineOverview: React.FC<ArkashineOverviewProps> = ({
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border border-slate-200 shadow-2xs shrink-0 bg-white">
             <img
-              src="/assets/images/tree-soil-ecosystem.png"
+              src="/assets/images/tree-soil-ecosystem.webp"
               alt="Healthy soil feeding vibrant trees"
+              width={96}
+              height={96}
+              loading="lazy"
               className="w-full h-full object-cover"
             />
           </div>

@@ -1,22 +1,17 @@
-import React from 'react';
 import { 
   X, 
   ChevronLeft, 
   ChevronRight, 
-  Calendar, 
   Clock, 
   UserCheck, 
   FlaskConical, 
   Users, 
-  AlertTriangle, 
-  CheckCircle2, 
-  MapPin, 
   MessageSquareQuote,
   ShieldAlert
 } from 'lucide-react';
-import { DailyLog, School } from '../../types';
 import { StatusChip } from '../common/StatusChip';
 import { storageService } from '../../services/storageService';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface DayHistoryDrawerProps {
   isOpen: boolean;
@@ -35,6 +30,8 @@ export const DayHistoryDrawer: React.FC<DayHistoryDrawerProps> = ({
   onNavigateDay,
   onOpenSchoolTimeline
 }) => {
+  const { containerRef } = useModalA11y({ isOpen, onClose });
+
   if (!isOpen) return null;
 
   const school = storageService.getSchool(schoolId);
@@ -52,14 +49,23 @@ export const DayHistoryDrawer: React.FC<DayHistoryDrawerProps> = ({
     : 0;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div 
+      className="fixed inset-0 z-50 overflow-hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="day-history-drawer-title"
+    >
       <div 
         className="absolute inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity"
         onClick={onClose}
       />
       
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-lg bg-white shadow-2xl flex flex-col border-l border-slate-200">
+        <div 
+          ref={containerRef}
+          tabIndex={-1}
+          className="w-screen max-w-lg bg-white shadow-2xl flex flex-col border-l border-slate-200 focus:outline-hidden"
+        >
           
           {/* Header */}
           <div className="p-5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
@@ -70,7 +76,7 @@ export const DayHistoryDrawer: React.FC<DayHistoryDrawerProps> = ({
                 </span>
                 {log && <StatusChip status={log.status} />}
               </div>
-              <h3 className="text-base font-bold text-slate-900 truncate">
+              <h3 id="day-history-drawer-title" className="text-base font-bold text-slate-900 truncate">
                 {school?.name || 'School Log'}
               </h3>
               <p className="text-xs text-slate-500">

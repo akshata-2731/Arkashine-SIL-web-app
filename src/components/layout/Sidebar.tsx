@@ -9,7 +9,6 @@ import {
   Sprout, 
   ClipboardCheck, 
   Award, 
-  HelpCircle, 
   FlaskConical, 
   TrendingUp,
   MapPin,
@@ -18,10 +17,13 @@ import {
 } from 'lucide-react';
 import { Role } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useT } from '../../i18n/useT';
+import { getInitialsAvatar } from '../../utils/avatarUtils';
 
 interface SidebarProps {
-  currentTab: string;
-  onTabChange: (tab: string) => void;
+  currentTab?: string;
+  onTabChange?: (tab: string) => void;
   isOpenMobile: boolean;
   onCloseMobile: () => void;
 }
@@ -40,46 +42,49 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile
 }) => {
   const { currentRole, currentUser } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { t } = useT();
 
   const getNavItems = (role: Role): NavItem[] => {
     switch (role) {
       case 'arkashine':
         return [
-          { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-          { id: 'schools', label: 'Schools & Partners', icon: SchoolIcon },
-          { id: 'heatmap', label: 'Program Heat Map', icon: CalendarDays },
-          { id: 'esg', label: 'Impact & ESG', icon: TrendingUp },
-          { id: 'certificates', label: 'Certificates', icon: Award },
-          { id: 'settings', label: 'Reports & Settings', icon: Settings2 }
+          { id: 'overview', label: t('nav.overview', 'Overview'), icon: LayoutDashboard },
+          { id: 'schools', label: t('nav.schools', 'Schools & Partners'), icon: SchoolIcon },
+          { id: 'heatmap', label: t('nav.heatmap', 'Program Heat Map'), icon: CalendarDays },
+          { id: 'esg', label: t('nav.esg', 'Impact & ESG'), icon: TrendingUp },
+          { id: 'certificates', label: t('nav.certificates', 'Certificates'), icon: Award },
+          { id: 'settings', label: t('nav.settings', 'Reports & Settings'), icon: Settings2 }
         ];
       case 'partner':
         return [
-          { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-          { id: 'schools', label: 'My Schools & Lab Setup', icon: SchoolIcon },
-          { id: 'selection', label: 'Student Selection', icon: Users },
-          { id: 'heatmap', label: 'Daily Updates & Heat Map', icon: CalendarDays },
-          { id: 'outreach', label: 'Outreach & Support', icon: Sprout }
+          { id: 'overview', label: t('nav.overview', 'Overview'), icon: LayoutDashboard },
+          { id: 'schools', label: t('nav.partner_schools', 'My Schools & Lab Setup'), icon: SchoolIcon },
+          { id: 'selection', label: t('nav.selection', 'Student Selection'), icon: Users },
+          { id: 'heatmap', label: t('nav.partner_heatmap', 'Daily Updates & Heat Map'), icon: CalendarDays },
+          { id: 'outreach', label: t('nav.outreach', 'Outreach & Support'), icon: Sprout }
         ];
       case 'principal':
         return [
-          { id: 'overview', label: 'My School', icon: LayoutDashboard },
-          { id: 'logs', label: 'Daily Log & Remarks', icon: ClipboardCheck },
-          { id: 'students', label: 'Students & Risk', icon: Users },
-          { id: 'certificates', label: 'Certificates', icon: Award }
+          { id: 'overview', label: t('nav.principal_overview', 'My School'), icon: LayoutDashboard },
+          { id: 'logs', label: t('nav.logs', 'Daily Log & Remarks'), icon: ClipboardCheck },
+          { id: 'students', label: t('nav.principal_students', 'Students & Risk'), icon: Users },
+          { id: 'certificates', label: t('nav.certificates', 'Certificates'), icon: Award }
         ];
       case 'faculty':
         return [
-          { id: 'today', label: "Today's Update", icon: ClipboardCheck, badge: 'Daily' },
-          { id: 'students', label: 'Students & Attendance', icon: Users },
-          { id: 'soillab', label: 'Soil Lab (SoiLENZ)', icon: FlaskConical },
-          { id: 'outreach', label: 'Outreach & Campaigns', icon: MapPin }
+          { id: 'today', label: t('nav.today', "Today's Update"), icon: ClipboardCheck, badge: 'Daily' },
+          { id: 'students', label: t('nav.faculty_students', 'Students & Attendance'), icon: Users },
+          { id: 'soillab', label: t('nav.soillab', 'Soil Lab (SoiLENZ)'), icon: FlaskConical },
+          { id: 'outreach', label: t('nav.faculty_outreach', 'Outreach & Campaigns'), icon: MapPin }
         ];
       case 'student':
         return [
-          { id: 'journey', label: 'My Soil Journey', icon: Compass },
-          { id: 'modules', label: 'Modules & Quizzes', icon: FlaskConical },
-          { id: 'badges', label: 'Badges & Rewards', icon: Award },
-          { id: 'certificate', label: 'Soil Partner Certificate', icon: FileCheck2 }
+          { id: 'journey', label: t('nav.student_journey', 'My Soil Journey'), icon: Compass },
+          { id: 'modules', label: t('nav.student_modules', 'Modules & Quizzes'), icon: FlaskConical },
+          { id: 'badges', label: t('nav.student_badges', 'Badges & Rewards'), icon: Award },
+          { id: 'certificate', label: t('nav.student_cert', 'Soil Partner Certificate'), icon: FileCheck2 }
         ];
       default:
         return [];
@@ -89,11 +94,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navItems = getNavItems(currentRole);
 
   const roleLabels: Record<Role, string> = {
-    arkashine: 'Arkashine HQ',
-    partner: 'Enabling Partner',
-    principal: 'School Principal',
-    faculty: 'Faculty Coordinator',
-    student: 'Student Portal'
+    arkashine: t('role.arkashine', 'Arkashine HQ'),
+    partner: t('role.partner', 'Enabling Partner'),
+    principal: t('role.principal', 'School Principal'),
+    faculty: t('role.faculty', 'Faculty Coordinator'),
+    student: t('role.student', 'Student Portal')
   };
 
   const navContent = (
@@ -145,12 +150,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = currentTab === item.id;
+          const targetPath = `/${currentRole}/${item.id}`;
+          const isActive = location.pathname === targetPath || location.pathname.startsWith(`${targetPath}/`) || (currentTab ? currentTab === item.id : false);
           return (
             <button
               key={item.id}
               onClick={() => {
-                onTabChange(item.id);
+                navigate(targetPath);
+                if (onTabChange) onTabChange(item.id);
                 onCloseMobile();
               }}
               style={isActive ? {
@@ -192,7 +199,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         <div className="flex items-center gap-3">
           <img
-            src={currentUser.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.name}`}
+            src={currentUser.avatar || getInitialsAvatar(currentUser.name)}
             alt={currentUser.name}
             className="w-9 h-9 rounded-xl border border-white/20 bg-white/10 object-cover"
           />

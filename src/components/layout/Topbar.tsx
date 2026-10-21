@@ -11,6 +11,9 @@ import { Role } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { storageService } from '../../services/storageService';
 import { ThemeColorPicker } from '../common/ThemeColorPicker';
+import { useNavigate } from 'react-router-dom';
+import { ROLE_DEFAULT_ROUTES } from '../routing/RoleRouteGuard';
+import { useT } from '../../i18n/useT';
 
 interface TopbarProps {
   onOpenMobileNav: () => void;
@@ -25,6 +28,8 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenMobileNav, pageTitle }) =>
     toggleLanguage,
     refreshData 
   } = useAuth();
+  const navigate = useNavigate();
+  const { t } = useT();
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -33,20 +38,22 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenMobileNav, pageTitle }) =>
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const roleOptions: { role: Role; label: string; org: string }[] = [
-    { role: 'arkashine', label: 'Arkashine HQ', org: 'Super Admin' },
-    { role: 'partner', label: 'Enabling Partner', org: 'GreenHorizon AgriEd' },
-    { role: 'principal', label: 'School Principal', org: "St. Xavier's Model" },
-    { role: 'faculty', label: 'Faculty Coordinator', org: 'Dr. Anjali Patil' },
-    { role: 'student', label: 'Student Portal', org: 'Ananya Sharma (Class X)' }
+    { role: 'arkashine', label: t('role.arkashine', 'Arkashine HQ'), org: 'Super Admin' },
+    { role: 'partner', label: t('role.partner', 'Enabling Partner'), org: 'GreenHorizon AgriEd' },
+    { role: 'principal', label: t('role.principal', 'School Principal'), org: "St. Xavier's Model" },
+    { role: 'faculty', label: t('role.faculty', 'Faculty Coordinator'), org: 'Dr. Anjali Patil' },
+    { role: 'student', label: t('role.student', 'Student Portal'), org: 'Ananya Sharma (Class X)' }
   ];
 
-  const currentRoleObj = roleOptions.find(r => r.role === currentRole) || roleOptions[0];
+  const handleRoleChange = (newRole: Role) => {
+    switchRole(newRole);
+    navigate(ROLE_DEFAULT_ROUTES[newRole] || '/arkashine/overview');
+  };
 
   const handleResetData = () => {
     storageService.resetAllData();
     refreshData();
     setShowResetConfirm(false);
-    window.location.reload();
   };
 
   return (
@@ -76,7 +83,7 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenMobileNav, pageTitle }) =>
           <div className="relative">
             <select
               value={currentRole}
-              onChange={(e) => switchRole(e.target.value as Role)}
+              onChange={(e) => handleRoleChange(e.target.value as Role)}
               aria-label="Select user role"
               className="appearance-none pl-8 pr-8 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 cursor-pointer focus:outline-hidden transition-colors"
             >
@@ -181,13 +188,13 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenMobileNav, pageTitle }) =>
                 onClick={() => setShowResetConfirm(false)}
                 className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
               >
-                Cancel
+                {t('action.cancel', 'Cancel')}
               </button>
               <button
                 onClick={handleResetData}
                 className="px-3.5 py-1.5 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs"
               >
-                Reset All
+                {t('action.reset', 'Reset All')}
               </button>
             </div>
           </div>

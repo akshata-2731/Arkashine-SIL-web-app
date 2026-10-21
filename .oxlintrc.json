@@ -3,6 +3,15 @@
   "plugins": ["react", "typescript", "oxc"],
   "rules": {
     "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+    "react/jsx-no-undef": "error",
+    "react/jsx-key": "error",
+    "react/no-direct-mutation-state": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }],
+    "typescript/no-explicit-any": "error",
+    "typescript/no-duplicate-enum-values": "error",
+    "eslint/no-debugger": "error",
+    "eslint/no-duplicate-case": "error",
+    "eslint/no-unused-vars": "warn",
+    "eslint/no-constant-condition": "warn"
   }
 }

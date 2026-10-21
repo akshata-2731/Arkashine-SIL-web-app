@@ -13,14 +13,16 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   description,
   actionLabel,
   onAction,
-  imageSrc = '/assets/images/empty-state.png'
+  imageSrc = '/assets/images/empty-state.webp'
 }) => {
   return (
     <div className="flex flex-col items-center justify-center py-12 px-4 text-center max-w-md mx-auto">
       <div className="w-48 h-48 mb-4 relative overflow-hidden rounded-2xl">
         <img
           src={imageSrc}
-          alt="No data available"
+          alt={title || "No data available"}
+          width={192}
+          height={192}
           className="w-full h-full object-contain mix-blend-multiply"
           loading="lazy"
         />

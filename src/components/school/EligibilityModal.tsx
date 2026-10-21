@@ -6,17 +6,14 @@ import {
   XCircle, 
   ShieldCheck, 
   FileText, 
-  Upload, 
   ArrowRight,
-  Info,
-  Clock,
   Lock
 } from 'lucide-react';
 import { School, ChecklistItem } from '../../types';
 import { ScoreRing } from '../common/ScoreRing';
-import { StatusChip } from '../common/StatusChip';
 import { storageService } from '../../services/storageService';
 import { useAuth } from '../../context/AuthContext';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface EligibilityModalProps {
   school: School | null;
@@ -31,12 +28,24 @@ export const EligibilityModal: React.FC<EligibilityModalProps> = ({
   onClose,
   onSaved
 }) => {
-  if (!isOpen || !school) return null;
-
-  const { currentRole, currentUser } = useAuth();
-  const [items, setItems] = useState<ChecklistItem[]>(school.eligibility.items || []);
+  const { currentUser } = useAuth();
+  const [items, setItems] = useState<ChecklistItem[]>(() => school?.eligibility.items || []);
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [enrollMessage, setEnrollMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+  const { containerRef } = useModalA11y({ isOpen, onClose });
+
+  // Sync items when school changes
+  const prevSchoolIdRef = React.useRef(school?.id);
+  React.useEffect(() => {
+    if (school?.id !== prevSchoolIdRef.current) {
+      prevSchoolIdRef.current = school?.id;
+      if (school?.eligibility.items) {
+        setItems(school.eligibility.items);
+      }
+    }
+  }, [school?.id, school?.eligibility.items]);
+
+  if (!isOpen || !school) return null;
 
   const categories = ['All', 'Space', 'Infrastructure', 'Safety', 'People', 'Students', 'Agreement'];
 
@@ -62,9 +71,18 @@ export const EligibilityModal: React.FC<EligibilityModalProps> = ({
 
   const handleNotesChange = (itemId: string, notes: string) => {
     setItems(prev => prev.map(item => item.id === itemId ? { ...item, notes } : item));
+    setEnrollMessage(null);
   };
 
+  // Validation: any item flagged needs_fix or no must have notes describing the issue
+  const invalidItems = items.filter(i => (i.status === 'needs_fix' || i.status === 'no') && (!i.notes || !i.notes.trim()));
+  const isChecklistValid = invalidItems.length === 0;
+
   const handleSaveEvaluation = () => {
+    if (!isChecklistValid) {
+      setEnrollMessage({ type: 'error', text: `Please add verification notes explaining issues for ${invalidItems.length} flagged item(s).` });
+      return;
+    }
     storageService.updateSchoolEligibilityCheck(school.id, items, currentUser.name);
     onSaved();
     setEnrollMessage({ type: 'success', text: `Eligibility evaluation saved! Status: ${liveResult.replace(/_/g, ' ')} (${liveScore}%)` });
@@ -95,8 +113,17 @@ export const EligibilityModal: React.FC<EligibilityModalProps> = ({
   const currentStageIndex = pipelineStages.findIndex(p => p.stage === school.status);
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-white rounded-2xl max-w-4xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+    <div 
+      className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="eligibility-modal-title"
+    >
+      <div 
+        ref={containerRef}
+        tabIndex={-1}
+        className="bg-white rounded-2xl max-w-4xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh] focus:outline-hidden"
+      >
         
         {/* Header with Pipeline Bar */}
         <div className="p-5 border-b border-slate-200 bg-slate-50">
@@ -106,7 +133,7 @@ export const EligibilityModal: React.FC<EligibilityModalProps> = ({
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">
+                <h3 id="eligibility-modal-title" className="text-base font-bold text-slate-900">
                   School Enrollment Gate: {school.name}
                 </h3>
                 <p className="text-xs text-slate-500">
@@ -116,7 +143,8 @@ export const EligibilityModal: React.FC<EligibilityModalProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors"
+              aria-label="Close eligibility dialog"
             >
               <X className="w-5 h-5" />
             </button>
@@ -229,18 +257,29 @@ export const EligibilityModal: React.FC<EligibilityModalProps> = ({
                   </div>
 
                   {/* Verification Notes / Proof */}
-                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-100">
-                    <input
-                      type="text"
-                      value={item.notes || ''}
-                      onChange={(e) => handleNotesChange(item.id, e.target.value)}
-                      placeholder="Add verification notes, photo link or inspector remark..."
-                      className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-700 focus:outline-hidden focus:border-emerald-500"
-                    />
-                    {item.proofDocumentUrl && (
-                      <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                        <FileText className="w-3 h-3" /> Doc Attached
-                      </span>
+                  <div className="mt-2 pt-2 border-t border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={item.notes || ''}
+                        onChange={(e) => handleNotesChange(item.id, e.target.value)}
+                        placeholder={(item.status === 'needs_fix' || item.status === 'no') ? "Required: explain required condition or cause..." : "Add verification notes, photo link or inspector remark..."}
+                        className={`flex-1 border rounded-lg px-2.5 py-1 text-xs text-slate-700 focus:outline-hidden ${
+                          (item.status === 'needs_fix' || item.status === 'no') && (!item.notes || !item.notes.trim())
+                            ? 'border-rose-400 bg-rose-50/20 focus:border-rose-500'
+                            : 'bg-slate-50 border-slate-200 focus:border-emerald-500'
+                        }`}
+                      />
+                      {item.proofDocumentUrl && (
+                        <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                          <FileText className="w-3 h-3" /> Doc Attached
+                        </span>
+                      )}
+                    </div>
+                    {(item.status === 'needs_fix' || item.status === 'no') && (!item.notes || !item.notes.trim()) && (
+                      <p className="text-[11px] text-rose-600 font-medium mt-1">
+                        ⚠️ Please add note explaining the required remedy or defect.
+                      </p>
                     )}
                   </div>
                 </div>
@@ -329,16 +368,17 @@ export const EligibilityModal: React.FC<EligibilityModalProps> = ({
             {/* Action Buttons */}
             <div className="space-y-2 pt-2">
               <button
+                disabled={!isChecklistValid}
                 onClick={handleSaveEvaluation}
-                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs transition-colors shadow-xs"
+                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-semibold text-xs transition-colors shadow-xs cursor-pointer"
               >
                 Save Evaluation Checklist
               </button>
 
               <button
-                disabled={liveResult === 'Not_Eligible'}
+                disabled={!isChecklistValid || liveResult === 'Not_Eligible'}
                 onClick={handleEnrollSchool}
-                className="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-semibold text-xs transition-colors shadow-xs"
+                className="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-semibold text-xs transition-colors shadow-xs cursor-pointer"
               >
                 {school.status === 'Lab_Setup' || school.status === 'Approved'
                   ? 'Advance to Enrolled Status'

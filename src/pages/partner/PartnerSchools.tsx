@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  School as SchoolIcon, 
-  ShieldCheck, 
-  Wrench, 
-  CheckCircle2, 
-  Clock, 
-  AlertTriangle,
-  ChevronRight
-} from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { useAuth } from '../../context/AuthContext';
 import { School } from '../../types';
@@ -50,8 +42,11 @@ export const PartnerSchools: React.FC = () => {
               {/* Image Banner */}
               <div className="h-36 w-full relative overflow-hidden bg-slate-100 border-b border-slate-100">
                 <img
-                  src={sch.bannerImage || '/assets/images/hero-banner.png'}
+                  src={sch.bannerImage?.replace('.png', '.webp') || '/assets/images/hero-banner.webp'}
                   alt={sch.name}
+                  width={400}
+                  height={144}
+                  loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />

@@ -2,19 +2,16 @@ import React, { useState } from 'react';
 import { 
   X, 
   Printer, 
-  Download, 
   QrCode, 
   CheckCircle2, 
   AlertTriangle, 
-  ShieldCheck, 
-  Award, 
-  Lock,
-  ExternalLink
+  Award
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { Student, School } from '../../types';
+import { Student } from '../../types';
 import { storageService } from '../../services/storageService';
 import { QrVerificationModal } from './QrVerificationModal';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface CertificateModalProps {
   student: Student | null;
@@ -29,12 +26,13 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
   onClose,
   onStatusUpdated
 }) => {
+  const [showQrVerify, setShowQrVerify] = useState(false);
+  const [issueError, setIssueError] = useState<string | null>(null);
+  const { containerRef } = useModalA11y({ isOpen, onClose });
+
   if (!isOpen || !student) return null;
 
   const school = storageService.getSchool(student.schoolId);
-  const [showQrVerify, setShowQrVerify] = useState(false);
-  const [issueError, setIssueError] = useState<string | null>(null);
-
   const isIssued = student.certificateStatus === 'Issued';
   const isEligible = student.certificateStatus === 'Eligible';
   const isIncomplete = student.certificateStatus === 'Incomplete_Data';
@@ -61,8 +59,17 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-        <div className="bg-white rounded-3xl max-w-4xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+      <div 
+        className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cert-modal-title"
+      >
+        <div 
+          ref={containerRef}
+          tabIndex={-1}
+          className="bg-white rounded-3xl max-w-4xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] focus:outline-hidden"
+        >
           
           {/* Header */}
           <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between no-print">
@@ -71,7 +78,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                 <Award className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">
+                <h3 id="cert-modal-title" className="text-base font-bold text-slate-900">
                   Soil Partner Completion Certificate
                 </h3>
                 <p className="text-xs text-slate-500">
@@ -165,8 +172,11 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
               {/* Background watermark leaf motif */}
               <div className="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center">
                 <img
-                  src="/assets/images/certificate-bg.png"
-                  alt="Background pattern"
+                  src="/assets/images/certificate-bg.webp"
+                  alt="Decorative watermark background pattern"
+                  width={800}
+                  height={560}
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
               </div>
