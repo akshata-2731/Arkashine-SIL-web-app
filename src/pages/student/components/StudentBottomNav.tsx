@@ -1,7 +1,7 @@
 import React from 'react';
-import { Compass, Microscope, BookOpen, Award, FileText } from 'lucide-react';
+import { Compass, Film, Microscope, BookOpen, Award, FileText } from 'lucide-react';
 
-export type StudentNavTab = 'journey' | 'diagrams' | 'modules' | 'badges' | 'certificate';
+export type StudentNavTab = 'journey' | 'videos' | 'diagrams' | 'modules' | 'badges' | 'certificate';
 
 interface StudentBottomNavProps {
   activeTab: StudentNavTab;
@@ -21,6 +21,11 @@ export const StudentBottomNav: React.FC<StudentBottomNavProps> = ({
       icon: Compass
     },
     {
+      id: 'videos',
+      label: { en: 'Videos', hi: 'वीडियो' },
+      icon: Film
+    },
+    {
       id: 'diagrams',
       label: { en: 'Explore', hi: 'मिट्टी' },
       icon: Microscope
@@ -37,7 +42,7 @@ export const StudentBottomNav: React.FC<StudentBottomNavProps> = ({
     },
     {
       id: 'certificate',
-      label: { en: 'Cert', hi: 'प्रमाणपत्र' },
+      label: { en: 'Cert', hi: 'प्रमाण' },
       icon: FileText
     }
   ];
@@ -47,7 +52,7 @@ export const StudentBottomNav: React.FC<StudentBottomNavProps> = ({
       aria-label="Student mobile navigation"
       className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1 shadow-lg"
     >
-      <div className="grid grid-cols-5 items-center justify-around max-w-md mx-auto">
+      <div className="grid grid-cols-6 items-center justify-around max-w-lg mx-auto">
         {navItems.map(item => {
           const isActive = activeTab === item.id;
           const Icon = item.icon;

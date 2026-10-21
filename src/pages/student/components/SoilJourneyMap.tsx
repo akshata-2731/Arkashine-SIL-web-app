@@ -23,11 +23,13 @@ import { studentSpeech } from '../../../utils/studentSpeech';
 interface SoilJourneyMapProps {
   language: 'en' | 'hi';
   onExploreDiagrams: () => void;
+  onWatchVideos?: () => void;
 }
 
 export const SoilJourneyMap: React.FC<SoilJourneyMapProps> = ({
   language,
-  onExploreDiagrams
+  onExploreDiagrams,
+  onWatchVideos
 }) => {
   const [completedSteps, setCompletedSteps] = useState<number[]>([1, 2, 3, 4, 5, 6]);
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
@@ -148,14 +150,25 @@ export const SoilJourneyMap: React.FC<SoilJourneyMapProps> = ({
           </div>
         </div>
 
-        {/* Action Button to Open Science Wonders */}
-        <button
-          type="button"
-          onClick={onExploreDiagrams}
-          className="w-full md:w-auto px-5 py-3.5 rounded-2xl bg-purple-700 hover:bg-purple-800 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer min-h-[48px]"
-        >
-          <span>{language === 'hi' ? 'जमीन के अंदर झांकें 🔬' : 'Explore Soil Wonders 🔬'}</span>
-        </button>
+        {/* Action Buttons to Open Videos and Science Wonders */}
+        <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full md:w-auto">
+          {onWatchVideos && (
+            <button
+              type="button"
+              onClick={onWatchVideos}
+              className="w-full sm:w-auto px-4 py-3 rounded-2xl bg-purple-700 hover:bg-purple-800 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer min-h-[48px]"
+            >
+              <span>{language === 'hi' ? 'वीडियो पाठ देखें 🎬' : 'Watch Videos 🎬'}</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onExploreDiagrams}
+            className="w-full sm:w-auto px-4 py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer min-h-[48px]"
+          >
+            <span>{language === 'hi' ? 'जमीन के अंदर झांकें 🔬' : 'Explore Soil Wonders 🔬'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Visual Winding Trail Stepping Stones */}

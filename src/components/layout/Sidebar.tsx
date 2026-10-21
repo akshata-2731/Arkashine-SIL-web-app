@@ -14,6 +14,7 @@ import {
   MapPin,
   Compass,
   Microscope,
+  Film,
   X
 } from 'lucide-react';
 import { Role } from '../../types';
@@ -83,6 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       case 'student':
         return [
           { id: 'journey', label: t('nav.student_journey', 'My Soil Journey'), icon: Compass },
+          { id: 'videos', label: t('nav.student_videos', 'Animated Video Lessons'), icon: Film },
           { id: 'diagrams', label: t('nav.student_diagrams', 'Soil Explorer & Diagrams'), icon: Microscope },
           { id: 'modules', label: t('nav.student_modules', 'Modules & Quizzes'), icon: FlaskConical },
           { id: 'badges', label: t('nav.student_badges', 'Badges & Rewards'), icon: Award },

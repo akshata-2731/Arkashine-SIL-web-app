@@ -119,6 +119,14 @@ export const translations: Translations = {
     en: 'Modules & Quizzes',
     hi: 'मॉड्यूल और क्विज़'
   },
+  'nav.student_videos': {
+    en: 'Animated Video Lessons',
+    hi: 'एनिमेटेड वीडियो पाठ'
+  },
+  'nav.videos': {
+    en: 'Learning Videos',
+    hi: 'शिक्षण वीडियो'
+  },
   'nav.student_diagrams': {
     en: 'Soil Explorer & Diagrams',
     hi: 'मृदा अन्वेषक व आरेख'

@@ -6,11 +6,13 @@ import {
   Microscope, 
   BookOpen, 
   Languages, 
-  Star
+  Star,
+  Film
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { storageService } from '../../services/storageService';
 import { CertificateModal } from '../../components/certificate/CertificateModal';
+import { VideoGallery } from '../../components/video/VideoGallery';
 import { BhoomiMascot } from './components/BhoomiMascot';
 import { SoilJourneyMap } from './components/SoilJourneyMap';
 import { SoilDiagrams } from './components/SoilDiagrams';
@@ -75,7 +77,7 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({
   const normalizeTab = (tab?: string): StudentNavTab => {
     if (!tab) return 'journey';
     if (tab === 'ecosystem' || tab === 'diagrams') return 'diagrams';
-    if (['journey', 'modules', 'badges', 'certificate'].includes(tab)) {
+    if (['journey', 'videos', 'diagrams', 'modules', 'badges', 'certificate'].includes(tab)) {
       return tab as StudentNavTab;
     }
     return 'journey';
@@ -225,6 +227,20 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({
 
         <button
           role="tab"
+          aria-selected={activeTab === 'videos'}
+          onClick={() => handleTabSelect('videos')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'videos'
+              ? 'bg-white text-emerald-800 shadow-xs font-black'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+          }`}
+        >
+          <Film className="w-4 h-4 text-purple-600" />
+          <span>{language === 'hi' ? '🎬 वीडियो पाठ (6)' : '🎬 Animated Videos (6)'}</span>
+        </button>
+
+        <button
+          role="tab"
           aria-selected={activeTab === 'diagrams'}
           onClick={() => handleTabSelect('diagrams')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
@@ -286,7 +302,14 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({
           <SoilJourneyMap 
             language={language} 
             onExploreDiagrams={() => handleTabSelect('diagrams')} 
+            onWatchVideos={() => handleTabSelect('videos')} 
           />
+        )}
+
+        {activeTab === 'videos' && (
+          <div className="space-y-6">
+            <VideoGallery />
+          </div>
         )}
 
         {activeTab === 'diagrams' && (

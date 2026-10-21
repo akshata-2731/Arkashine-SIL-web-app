@@ -15,6 +15,7 @@ const ArkashineOverview = lazy(() => import('./pages/arkashine/ArkashineOverview
 const ArkashineSchools = lazy(() => import('./pages/arkashine/ArkashineSchools').then(m => ({ default: m.ArkashineSchools })));
 const ArkashineCertificates = lazy(() => import('./pages/arkashine/ArkashineCertificates').then(m => ({ default: m.ArkashineCertificates })));
 const ArkashineSettings = lazy(() => import('./pages/arkashine/ArkashineSettings').then(m => ({ default: m.ArkashineSettings })));
+const ArkashineVideos = lazy(() => import('./pages/arkashine/ArkashineVideos').then(m => ({ default: m.ArkashineVideos })));
 const ESGView = lazy(() => import('./components/esg/ESGView').then(m => ({ default: m.ESGView })));
 
 // Partner Pages (Lazy loaded)
@@ -132,6 +133,14 @@ const MainLayout: React.FC = () => {
                 element={
                   <RoleRouteGuard allowedRole="arkashine">
                     <ArkashineSettings />
+                  </RoleRouteGuard>
+                }
+              />
+              <Route
+                path="/arkashine/videos"
+                element={
+                  <RoleRouteGuard allowedRole="arkashine">
+                    <ArkashineVideos />
                   </RoleRouteGuard>
                 }
               />
@@ -268,6 +277,14 @@ const MainLayout: React.FC = () => {
                 element={
                   <RoleRouteGuard allowedRole="student">
                     <StudentJourney currentTab="journey" onTabChange={(tab) => navigate(`/student/${tab}`)} />
+                  </RoleRouteGuard>
+                }
+              />
+              <Route
+                path="/student/videos"
+                element={
+                  <RoleRouteGuard allowedRole="student">
+                    <StudentJourney currentTab="videos" onTabChange={(tab) => navigate(`/student/${tab}`)} />
                   </RoleRouteGuard>
                 }
               />
