@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   CalendarDays, 
   CheckCircle2, 
@@ -6,13 +7,15 @@ import {
   Check, 
   Search, 
   Flame, 
-  X
+  X,
+  Camera
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { storageService } from '../../services/storageService';
 import { Student, DailyLog } from '../../types';
 
 export const FacultyToday: React.FC = () => {
+  const navigate = useNavigate();
   const { activeSchoolId } = useAuth();
   const school = storageService.getSchool(activeSchoolId) || storageService.getSchools()[0];
 
@@ -468,20 +471,36 @@ export const FacultyToday: React.FC = () => {
               })}
             </div>
 
-            {/* Modal Footer with Close Button */}
-            <div className="p-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-800/50">
+            {/* Modal Footer with Close Button & Direct Link to Daily Log */}
+            <div className="p-3.5 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50/80 dark:bg-slate-800/50">
               <div className="text-xs font-bold">
                 <span className="text-emerald-600 font-black">{modalDayStats.present} Present</span>
                 <span className="mx-2 text-slate-300">•</span>
                 <span className="text-rose-600 font-black">{modalDayStats.absent} Absent</span>
               </div>
 
-              <button
-                onClick={() => setActiveDayModal(null)}
-                className="px-5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-white text-xs font-black shadow-md shadow-purple-600/25 transition-all cursor-pointer active:scale-98"
-              >
-                Done & Close
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const day = activeDayModal;
+                    setActiveDayModal(null);
+                    navigate(`/faculty/lessons?day=${day}`);
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-98"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  Day {activeDayModal} Log & Photos →
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveDayModal(null)}
+                  className="px-4 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
             </div>
 
           </div>
