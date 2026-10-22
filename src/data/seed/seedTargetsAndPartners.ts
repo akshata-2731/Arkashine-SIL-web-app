@@ -3,7 +3,7 @@ import { Partner, ProgramTargets } from '../../types';
 export const DEFAULT_PROGRAM_TARGETS: ProgramTargets = {
   totalHours: 72,
   weeklyHours: 18,
-  attendanceThreshold: 80,
+  attendanceThreshold: 70,
   targetFarmersPerSchool: 1500,
   targetSamplesPerSchool: 750,
   targetCampaignsPerSchool: 30,

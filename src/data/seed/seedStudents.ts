@@ -47,8 +47,12 @@ export function generateStudentsForSchool(schoolId: string, count: number = 18):
     let certStatus: 'Eligible' | 'Incomplete_Data' | 'Issued' | 'Not_Eligible' = 'Incomplete_Data';
     const missing: string[] = [];
 
-    if (attendanceRate < 80) {
-      missing.push(`Attendance at ${attendanceRate}% is below 80% threshold`);
+    if (attendanceRate < 70) {
+      missing.push(`Attendance at ${attendanceRate}% is strictly below the compulsory 70% threshold. Student is not eligible for certificate.`);
+    }
+    const parentConsentSigned = true; // All students signed parental consent for chemical reagents
+    if (!parentConsentSigned) {
+      missing.push('Parental permission slip pending signature (Mandatory due to chemical testing reagents)');
     }
     if (modulesCompleted < 4) {
       missing.push(`Module 4 assessment pending (currently at Module ${modulesCompleted})`);
@@ -105,7 +109,9 @@ export function generateStudentsForSchool(schoolId: string, count: number = 18):
       missingFields: missing,
       badgeIds,
       certificateId: certId,
-      verifiedQrHash: verifiedHash
+      verifiedQrHash: verifiedHash,
+      parentConsentSigned: true,
+      parentConsentDate: '2026-05-28'
     });
   }
 

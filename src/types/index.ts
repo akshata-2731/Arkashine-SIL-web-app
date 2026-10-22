@@ -105,6 +105,8 @@ export interface Student {
   badgeIds: string[];
   certificateId?: string;
   verifiedQrHash?: string;
+  parentConsentSigned?: boolean;
+  parentConsentDate?: string;
 }
 
 export type SessionType = 'Theory' | 'Practical' | 'Field' | 'Assessment';
