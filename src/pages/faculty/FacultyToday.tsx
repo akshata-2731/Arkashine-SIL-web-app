@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import confetti from 'canvas-confetti';
 import { 
   ClipboardCheck, 
   CheckCircle2, 
   Send,
-  AlertTriangle
+  AlertTriangle,
+  Calendar,
+  Sparkles,
+  Flame
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { storageService } from '../../services/storageService';
@@ -42,6 +46,14 @@ export const FacultyToday: React.FC = () => {
       return draft.topicsCovered;
     }
     return defaultTopics;
+  });
+
+  const [learningDescription, setLearningDescription] = useState<string>(() => {
+    const draft = storageService.getDraftDailyLog();
+    if (draft && draft.schoolId === school.id && draft.dayNumber === currentDayNum && draft.learningDescription) {
+      return draft.learningDescription;
+    }
+    return '';
   });
 
   const [sessionType, setSessionType] = useState<SessionType>(() => {
@@ -177,6 +189,7 @@ export const FacultyToday: React.FC = () => {
         dayNumber: currentDayNum,
         moduleNumber: selectedModule,
         topicsCovered: selectedTopics,
+        learningDescription,
         sessionType,
         hoursTaught,
         delayReason: delayReason.trim() || undefined,
@@ -198,6 +211,7 @@ export const FacultyToday: React.FC = () => {
     currentDayNum,
     selectedModule,
     selectedTopics,
+    learningDescription,
     sessionType,
     hoursTaught,
     delayReason,
@@ -224,7 +238,7 @@ export const FacultyToday: React.FC = () => {
 
   const handleAddSamplePhoto = () => {
     if (photos.length < 3) {
-      setPhotos(prev => [...prev, '/assets/images/module-soil-testing.webp']);
+      setPhotos(prev => [...prev, '/assets/images/module-soil-testing.png']);
     }
   };
 
@@ -238,6 +252,14 @@ export const FacultyToday: React.FC = () => {
     if (mod?.topics[0]) {
       setSelectedTopics([mod.topics[0].title]);
     }
+  };
+
+  const handleToggleTopic = (topicTitle: string) => {
+    setSelectedTopics(prev => 
+      prev.includes(topicTitle)
+        ? (prev.length > 1 ? prev.filter(tItem => tItem !== topicTitle) : prev)
+        : [...prev, topicTitle]
+    );
   };
 
   const handleSubmitDailyUpdate = (e: React.FormEvent) => {
@@ -265,6 +287,7 @@ export const FacultyToday: React.FC = () => {
       moduleNumber: selectedModule,
       moduleTitle: activeModObj?.title || 'Soil Testing using SoiLENZ Device',
       topicsCovered: selectedTopics.length > 0 ? selectedTopics : ['Practical Session Completed'],
+      learningDescription: learningDescription.trim() || undefined,
       sessionType,
       hoursTaught,
       plannedHours: 2.5,
@@ -285,42 +308,86 @@ export const FacultyToday: React.FC = () => {
     storageService.saveDailyLog(newLog, currentUser.name);
     storageService.clearDraftDailyLog();
 
-    setSuccessNotice(`Day ${currentDayNum} update submitted (${calculatedStatus.replace('_', ' ')})! Heat map updated.`);
-    setTimeout(() => setSuccessNotice(null), 5000);
+    // Confetti celebration
+    try {
+      confetti({
+        particleCount: 65,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    } catch {
+      // safe fallback
+    }
+
+    setSuccessNotice(`Day ${currentDayNum} update submitted (${calculatedStatus.replace('_', ' ')})! Attendance and heat map updated.`);
+    setTimeout(() => setSuccessNotice(null), 6000);
   };
 
+  const programPct = Math.round((currentDayNum / 28) * 100);
+
   return (
-    <div className="space-y-6 max-w-3xl mx-auto">
-      {/* Top Header Card */}
-      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-xs flex items-center justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold uppercase tracking-wider border border-emerald-200">
-              Quick-Log Engine (&lt;3 Minutes)
-            </span>
-            {draftSavedNotice && (
-              <span className="text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md font-semibold border border-emerald-200 animate-pulse">
-                {t('log.saved_draft', 'Draft saved')}
+    <div className="space-y-6 max-w-4xl mx-auto">
+      {/* Top Stylish Header Card with Program Progress Bar */}
+      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-xs font-black uppercase tracking-wider border border-emerald-200 flex items-center gap-1">
+                <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                <span>Daily Log Engine • 72-Hour Curriculum</span>
               </span>
-            )}
+              {draftSavedNotice && (
+                <span className="text-[11px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md font-bold border border-emerald-200 animate-pulse">
+                  {t('log.saved_draft', 'Auto-saved')}
+                </span>
+              )}
+            </div>
+
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <span>Day {currentDayNum} of 28 Daily Faculty Log</span>
+              <span className="text-sm font-semibold text-slate-500 hidden sm:inline">({school.code})</span>
+            </h1>
+
+            <p className="text-xs text-slate-500 mt-0.5">
+              {school.name} • Faculty Coordinator: <strong className="text-slate-700">{school.facultyName}</strong>
+            </p>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-            {t('log.title', `Day ${currentDayNum} of 28 Daily Update`)}
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {school.name} • Faculty: {school.facultyName}
-          </p>
+
+          <div className="flex items-center gap-2">
+            <div className="px-3.5 py-2 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center gap-2 text-xs font-bold text-emerald-900">
+              <Calendar className="w-4 h-4 text-emerald-700" />
+              <span>Day {currentDayNum} / 28</span>
+            </div>
+            <div className="w-11 h-11 rounded-2xl bg-[#5C26C0]/10 border border-[#5C26C0]/20 flex items-center justify-center shrink-0">
+              <ClipboardCheck className="w-5 h-5 text-[#5C26C0]" />
+            </div>
+          </div>
         </div>
 
-        <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0">
-          <ClipboardCheck className="w-5 h-5 text-emerald-700" />
+        {/* 28-day Progress Bar */}
+        <div className="pt-2 border-t border-slate-100 space-y-1.5">
+          <div className="flex items-center justify-between text-[11px] font-bold text-slate-600">
+            <span>SIL 28-Day Milestone Journey</span>
+            <span className="text-emerald-700 font-extrabold">{programPct}% Completed</span>
+          </div>
+          <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+            <div 
+              style={{ width: `${programPct}%` }}
+              className="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-[#5C26C0] rounded-full transition-all duration-500"
+            />
+          </div>
         </div>
       </div>
 
       {successNotice && (
-        <div className="p-4 bg-emerald-100 border border-emerald-300 rounded-2xl text-xs sm:text-sm font-bold text-emerald-900 flex items-center gap-2 animate-in fade-in">
-          <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0" />
-          <span>{successNotice}</span>
+        <div className="p-4 bg-emerald-100 border-2 border-emerald-400 rounded-3xl text-xs sm:text-sm font-black text-emerald-950 flex items-center gap-3 animate-in fade-in shadow-xs">
+          <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+          <div className="flex-1">
+            <p className="font-extrabold">{successNotice}</p>
+            <p className="text-[11px] text-emerald-800 font-medium">Student attendance statistics and school timeline updated in real-time.</p>
+          </div>
         </div>
       )}
 
@@ -329,6 +396,10 @@ export const FacultyToday: React.FC = () => {
         <ModuleFormatSection
           selectedModule={selectedModule}
           onSelectModule={handleSelectModule}
+          selectedTopics={selectedTopics}
+          onToggleTopic={handleToggleTopic}
+          learningDescription={learningDescription}
+          onLearningDescriptionChange={setLearningDescription}
           sessionType={sessionType}
           onSelectSessionType={setSessionType}
           hoursTaught={hoursTaught}
@@ -369,8 +440,8 @@ export const FacultyToday: React.FC = () => {
 
         {/* Validation Errors Notice */}
         {!isValid && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
+          <div className="p-4 rounded-3xl bg-rose-50 border border-rose-200 text-rose-900 text-xs font-semibold flex items-center gap-2.5 shadow-xs">
+            <AlertTriangle className="w-5 h-5 shrink-0 text-rose-600" />
             <span>Please resolve form errors before submitting: {Object.values(errors).join(' ')}</span>
           </div>
         )}
@@ -380,14 +451,15 @@ export const FacultyToday: React.FC = () => {
           <button
             type="submit"
             disabled={!isValid}
-            className={`w-full py-4 rounded-2xl font-extrabold text-sm flex items-center justify-center gap-2 shadow-md transition-all min-h-[52px] ${
+            className={`w-full py-4 px-6 rounded-2xl font-black text-sm flex items-center justify-center gap-2.5 shadow-md transition-all min-h-[54px] cursor-pointer ${
               isValid
-                ? 'bg-emerald-700 hover:bg-emerald-800 active:scale-98 text-white cursor-pointer'
+                ? 'bg-emerald-700 hover:bg-emerald-800 active:scale-98 text-white'
                 : 'bg-slate-300 text-slate-500 cursor-not-allowed opacity-60'
             }`}
           >
             <Send className="w-4 h-4" />
-            {t('log.submit_btn', `Submit Day ${currentDayNum} Daily Update`)}
+            <span>{t('log.submit_btn', `Submit Day ${currentDayNum} Daily Log & Update Attendance`)}</span>
+            <Sparkles className="w-4 h-4 text-amber-300" />
           </button>
         </div>
       </form>

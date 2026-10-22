@@ -2,6 +2,7 @@ import { DailyLog } from '../../types';
 import { storageCore, STORAGE_KEYS } from './storageCore';
 import { generateDailyLogsForSchool } from '../../data/seedData';
 import { schoolStorage } from './schoolStorage';
+import { studentStorage } from './studentStorage';
 
 export class DailyLogStorage {
   private getInitialDailyLogs(): DailyLog[] {
@@ -41,6 +42,30 @@ export class DailyLogStorage {
         school.currentDay = log.dayNumber;
         schoolStorage.saveSchool(school);
       }
+    }
+
+    // Synchronize enrolled student attendance records
+    if (log.studentAttendance && Object.keys(log.studentAttendance).length > 0) {
+      const schoolLogs = list.filter(l => l.schoolId === log.schoolId);
+      const schoolStudents = studentStorage.getStudents(log.schoolId);
+      schoolStudents.forEach(stu => {
+        let presentDays = 0;
+        let loggedDays = 0;
+        schoolLogs.forEach(sl => {
+          if (sl.studentAttendance && sl.studentAttendance[stu.id]) {
+            loggedDays++;
+            if (sl.studentAttendance[stu.id] === 'present' || sl.studentAttendance[stu.id] === 'late') {
+              presentDays++;
+            }
+          }
+        });
+        if (loggedDays > 0) {
+          stu.totalPresentDays = presentDays;
+          stu.totalLoggedDays = loggedDays;
+          stu.attendanceRate = Math.round((presentDays / loggedDays) * 100);
+          studentStorage.saveStudent(stu);
+        }
+      });
     }
 
     return log;

@@ -120,6 +120,7 @@ export interface DailyLog {
   moduleNumber: number; // 1 to 4
   moduleTitle: string;
   topicsCovered: string[];
+  learningDescription?: string;
   sessionType: SessionType;
   hoursTaught: number; // e.g. 2.5
   plannedHours: number; // usually 2.5 or 3.0
