@@ -75,7 +75,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ];
       case 'faculty':
         return [
-          { id: 'today', label: t('nav.attendance_heatmap', 'Daily Attendance & Heatmap'), icon: CalendarDays, badge: 'Live' }
+          { id: 'today', label: '1. Daily Attendance & Heatmap', icon: CalendarDays, badge: 'Live' },
+          { id: 'lessons', label: '2. Lesson Plan & Daily Log', icon: ClipboardCheck },
+          { id: 'soillab', label: '3. Soil Tests & Farmers', icon: FlaskConical }
         ];
       case 'student':
         return [
