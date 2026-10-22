@@ -9,7 +9,7 @@ import {
   X, 
   ChevronRight, 
   Clock, 
-  CheckCircle2 
+  CheckCircle2
 } from 'lucide-react';
 
 export interface VideoExplainer {
@@ -208,6 +208,34 @@ export const VideoGallery: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showQuizResult, setShowQuizResult] = useState<boolean>(false);
 
+  const [watchedIds, setWatchedIds] = useState<number[]>(() => {
+    try {
+      const saved = localStorage.getItem('arkashine_watched_videos');
+      return saved ? JSON.parse(saved) : [1, 2, 3];
+    } catch {
+      return [1, 2, 3];
+    }
+  });
+
+  const markVideoWatched = (id: number) => {
+    setWatchedIds((prev) => {
+      if (prev.includes(id)) return prev;
+      const next = [...prev, id];
+      try {
+        localStorage.setItem('arkashine_watched_videos', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const markAllVideosWatched = () => {
+    const allIds = VIDEO_EXPLAINERS.map(v => v.id);
+    setWatchedIds(allIds);
+    try {
+      localStorage.setItem('arkashine_watched_videos', JSON.stringify(allIds));
+    } catch {}
+  };
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animFrameRef = useRef<number | null>(null);
 
@@ -218,6 +246,7 @@ export const VideoGallery: React.FC = () => {
     setCurrentTime(0);
     setSelectedOption(null);
     setShowQuizResult(false);
+    markVideoWatched(vid.id);
   };
 
   const closeVideo = () => {
@@ -476,17 +505,38 @@ export const VideoGallery: React.FC = () => {
             Real-Time Animated Science Explainer Player 🎬
           </span>
           <h2 className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Animated Soil Science Video Lessons
+            Learning Videos
           </h2>
           <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
             Click any tile to launch the 60 FPS animated explainer with voiceover narration, bilingual subtitles, and instant science checkups.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-center">
-          <span className="text-xs font-bold text-[#5C26C0] dark:text-purple-300 bg-purple-50 dark:bg-purple-950 px-3 py-1 rounded-xl border border-purple-200 dark:border-purple-800">
-            6 HD Explainers Ready
-          </span>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-center">
+          <div className="bg-purple-50 dark:bg-purple-950 px-3 py-1.5 rounded-xl border border-purple-200 dark:border-purple-800 flex items-center gap-2">
+            <span className="text-xs font-bold text-[#5C26C0] dark:text-purple-300">
+              Watched: {watchedIds.length} of {VIDEO_EXPLAINERS.length}
+            </span>
+            <div className="w-14 h-2 bg-purple-200 dark:bg-purple-800 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-[#5C26C0] rounded-full transition-all"
+                style={{ width: `${(watchedIds.length / VIDEO_EXPLAINERS.length) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          {watchedIds.length < VIDEO_EXPLAINERS.length ? (
+            <button
+              onClick={markAllVideosWatched}
+              className="text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1.5 rounded-xl transition-colors cursor-pointer"
+            >
+              ✓ Mark All Watched
+            </button>
+          ) : (
+            <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1.5 rounded-xl flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5" /> All Watched
+            </span>
+          )}
         </div>
       </div>
 
@@ -525,6 +575,15 @@ export const VideoGallery: React.FC = () => {
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-purple-600/80 text-white">
                   {v.category}
                 </span>
+                {watchedIds.includes(v.id) ? (
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-600 text-white flex items-center gap-1 shadow-xs">
+                    <CheckCircle2 className="w-3 h-3" /> Watched
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-500 text-slate-950 flex items-center gap-1 shadow-xs">
+                    <Clock className="w-3 h-3" /> Required
+                  </span>
+                )}
               </div>
 
               <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1 text-[11px] font-mono text-white/90 bg-black/60 px-2 py-0.5 rounded-md">
