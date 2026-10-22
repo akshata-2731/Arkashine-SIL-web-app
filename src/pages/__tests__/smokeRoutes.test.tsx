@@ -65,7 +65,7 @@ describe('Role Home Views Smoke Tests', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/Faculty Daily Submission Log/i)).toBeInTheDocument();
+    expect(screen.getByText(/Daily Attendance & 28-Day Heatmap/i)).toBeInTheDocument();
   });
 
   it('renders StudentJourney without crashing', () => {

@@ -1,468 +1,558 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import confetti from 'canvas-confetti';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  ClipboardCheck, 
+  CalendarDays, 
   CheckCircle2, 
-  Send,
-  AlertTriangle,
-  Calendar,
-  Sparkles,
-  Flame
+  XCircle, 
+  Clock, 
+  Users, 
+  ChevronLeft, 
+  ChevronRight, 
+  Check, 
+  Search, 
+  Flame, 
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { storageService } from '../../services/storageService';
-import { CURRICULUM_MODULES } from '../../data/modulesData';
-import { DailyLog, SessionType } from '../../types';
-import { computeDailyLogStatus } from '../../utils/statusUtils';
-import { getNextAttendanceStatus } from '../../utils/attendanceUtils';
-import { ModuleFormatSection } from './components/ModuleFormatSection';
-import { StudentAttendanceSection } from './components/StudentAttendanceSection';
-import { LabProgressSection } from './components/LabProgressSection';
-import { useT } from '../../i18n/useT';
+import { Student, DailyLog } from '../../types';
 
 export const FacultyToday: React.FC = () => {
-  const { activeSchoolId, currentUser } = useAuth();
-  const { t } = useT();
+  const { activeSchoolId } = useAuth();
   const school = storageService.getSchool(activeSchoolId) || storageService.getSchools()[0];
-  const students = storageService.getStudents(school.id);
 
-  const currentDayNum = school.currentDay || 1;
-  const defaultModule = Math.min(4, Math.max(1, Math.ceil(currentDayNum / 7)));
-  const defaultModuleObj = CURRICULUM_MODULES.find(m => m.id === defaultModule);
-  const defaultTopics = defaultModuleObj?.topics[0] ? [defaultModuleObj.topics[0].title] : [];
+  const currentCohortDay = school?.currentDay || 20;
+  const [selectedDay, setSelectedDay] = useState<number>(currentCohortDay);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedTeamFilter, setSelectedTeamFilter] = useState<number | 'all'>('all');
+  
+  // Attendance state for currently selected day
+  const [attendance, setAttendance] = useState<Record<string, 'present' | 'absent' | 'late'>>({});
+  const [students, setStudents] = useState<Student[]>([]);
+  const [dailyLogs, setDailyLogs] = useState<DailyLog[]>([]);
+  const [saveToast, setSaveToast] = useState<string | null>(null);
 
-  // Form State with Offline Draft Support
-  const [selectedModule, setSelectedModule] = useState<number>(() => {
-    const draft = storageService.getDraftDailyLog();
-    if (draft && draft.schoolId === school.id && draft.dayNumber === currentDayNum && draft.moduleNumber) {
-      return draft.moduleNumber;
+  // Load data from storage
+  const loadData = () => {
+    if (!school) return;
+    const stuList = storageService.getStudents(school.id);
+    const logsList = storageService.getDailyLogs(school.id);
+    setStudents(stuList);
+    setDailyLogs(logsList);
+
+    // Find log for selected day
+    const dayLog = logsList.find(l => l.dayNumber === selectedDay);
+    if (dayLog && dayLog.studentAttendance) {
+      setAttendance({ ...dayLog.studentAttendance });
+    } else {
+      // Default initial state
+      const initial: Record<string, 'present' | 'absent' | 'late'> = {};
+      stuList.forEach(s => { initial[s.id] = 'present'; });
+      setAttendance(initial);
     }
-    return defaultModule;
-  });
+  };
 
-  const [selectedTopics, setSelectedTopics] = useState<string[]>(() => {
-    const draft = storageService.getDraftDailyLog();
-    if (draft && draft.schoolId === school.id && draft.dayNumber === currentDayNum && draft.topicsCovered) {
-      return draft.topicsCovered;
-    }
-    return defaultTopics;
-  });
-
-  const [learningDescription, setLearningDescription] = useState<string>(() => {
-    const draft = storageService.getDraftDailyLog();
-    if (draft && draft.schoolId === school.id && draft.dayNumber === currentDayNum && draft.learningDescription) {
-      return draft.learningDescription;
-    }
-    return '';
-  });
-
-  const [sessionType, setSessionType] = useState<SessionType>(() => {
-    const draft = storageService.getDraftDailyLog();
-    if (draft && draft.schoolId === school.id && draft.dayNumber === currentDayNum && draft.sessionType) {
-      return draft.sessionType;
-    }
-    return 'Practical';
-  });
-
-  const [hoursTaught, setHoursTaught] = useState<number>(() => {
-    const draft = storageService.getDraftDailyLog();
-    if (draft && draft.schoolId === school.id && draft.dayNumber === currentDayNum && draft.hoursTaught !== undefined) {
-      return draft.hoursTaught;
-    }
-    return 2.5;
-  });
-
-  const [delayReason, setDelayReason] = useState<string>(() => {
-    const draft = storageService.getDraftDailyLog();
-    if (draft && draft.schoolId === school.id && draft.dayNumber === currentDayNum && draft.delayReason) {
-      return draft.delayReason;
-    }
-    return '';
-  });
-
-  const [attendance, setAttendance] = useState<Record<string, 'present' | 'absent' | 'late'>>(() => {
-    const draft = storageService.getDraftDailyLog();
-    if (draft && draft.schoolId === school.id && draft.dayNumber === currentDayNum && draft.studentAttendance) {
-      return draft.studentAttendance;
-    }
-    const initial: Record<string, 'present' | 'absent' | 'late'> = {};
-    students.forEach(s => { initial[s.id] = 'present'; });
-    return initial;
-  });
-
-  const [samplesTested, setSamplesTested] = useState<number>(() => {
-    const draft = storageService.getDraftDailyLog();
-    if (draft && draft.schoolId === school.id && draft.dayNumber === currentDayNum && draft.samplesTestedCount !== undefined) {
-      return draft.samplesTestedCount;
-    }
-    return 0;
-  });
-
-  const [farmersReached, setFarmersReached] = useState<number>(() => {
-    const draft = storageService.getDraftDailyLog();
-    if (draft && draft.schoolId === school.id && draft.dayNumber === currentDayNum && draft.farmersReachedCount !== undefined) {
-      return draft.farmersReachedCount;
-    }
-    return 0;
-  });
-
-  const [stockUsed, setStockUsed] = useState<string>(() => {
-    const draft = storageService.getDraftDailyLog();
-    if (draft && draft.schoolId === school.id && draft.dayNumber === currentDayNum && draft.stockUsed !== undefined) {
-      return draft.stockUsed;
-    }
-    return '';
-  });
-
-  const [incidentNotes, setIncidentNotes] = useState<string>(() => {
-    const draft = storageService.getDraftDailyLog();
-    if (draft && draft.schoolId === school.id && draft.dayNumber === currentDayNum && draft.incidentNotes !== undefined) {
-      return draft.incidentNotes;
-    }
-    return '';
-  });
-
-  const [photos, setPhotos] = useState<string[]>(() => {
-    const draft = storageService.getDraftDailyLog();
-    if (draft && draft.schoolId === school.id && draft.dayNumber === currentDayNum && draft.photos) {
-      return draft.photos;
-    }
-    return [];
-  });
-
-  const [successNotice, setSuccessNotice] = useState<string | null>(null);
-  const [draftSavedNotice, setDraftSavedNotice] = useState<boolean>(false);
-
-  // Form Validation
-  const errors = useMemo(() => {
-    const errs: {
-      hoursTaught?: string;
-      delayReason?: string;
-      attendance?: string;
-      samplesTested?: string;
-      farmersReached?: string;
-    } = {};
-
-    if (isNaN(hoursTaught) || hoursTaught <= 0) {
-      errs.hoursTaught = 'Hours taught must be greater than 0.';
-    } else if (hoursTaught > 12) {
-      errs.hoursTaught = 'Hours taught cannot exceed 12 hours in a single day.';
-    }
-
-    if (hoursTaught < 1.5 && (!delayReason || delayReason.trim().length < 5)) {
-      errs.delayReason = 'Please explain the reason for reduced hours (min 5 characters).';
-    }
-
-    const presentCount = Object.values(attendance).filter(st => st === 'present' || st === 'late').length;
-    if (presentCount > students.length) {
-      errs.attendance = 'Present student count cannot exceed total enrolled students.';
-    }
-
-    if (samplesTested < 0 || !Number.isInteger(samplesTested)) {
-      errs.samplesTested = 'Samples tested cannot be negative and must be a whole number.';
-    } else if (samplesTested > 200) {
-      errs.samplesTested = 'Samples tested cannot exceed 200 per day.';
-    }
-
-    if (farmersReached < 0 || !Number.isInteger(farmersReached)) {
-      errs.farmersReached = 'Farmers reached cannot be negative and must be a whole number.';
-    } else if (farmersReached > 200) {
-      errs.farmersReached = 'Farmers reached cannot exceed 200 per day.';
-    }
-
-    return errs;
-  }, [hoursTaught, delayReason, attendance, students.length, samplesTested, farmersReached]);
-
-  const isValid = Object.keys(errors).length === 0;
-
-  // Debounced autosave effect (500 ms)
-  const isInitialMount = useRef(true);
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
+    loadData();
+  }, [school?.id, selectedDay]);
+
+  // Toast auto-hide
+  useEffect(() => {
+    if (saveToast) {
+      const timer = setTimeout(() => setSaveToast(null), 2500);
+      return () => clearTimeout(timer);
     }
+  }, [saveToast]);
 
-    const timer = setTimeout(() => {
-      storageService.saveDraftDailyLog({
-        schoolId: school.id,
-        dayNumber: currentDayNum,
-        moduleNumber: selectedModule,
-        topicsCovered: selectedTopics,
-        learningDescription,
-        sessionType,
-        hoursTaught,
-        delayReason: delayReason.trim() || undefined,
-        studentAttendance: attendance,
-        samplesTestedCount: samplesTested,
-        farmersReachedCount: farmersReached,
-        stockUsed,
-        incidentNotes,
-        photos
-      });
-      setDraftSavedNotice(true);
-      const hideTimer = setTimeout(() => setDraftSavedNotice(false), 2000);
-      return () => clearTimeout(hideTimer);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [
-    school.id,
-    currentDayNum,
-    selectedModule,
-    selectedTopics,
-    learningDescription,
-    sessionType,
-    hoursTaught,
-    delayReason,
-    attendance,
-    samplesTested,
-    farmersReached,
-    stockUsed,
-    incidentNotes,
-    photos
-  ]);
-
-  const handleMarkAll = (status: 'present' | 'absent' | 'late') => {
-    const updated: Record<string, 'present' | 'absent' | 'late'> = {};
-    students.forEach(s => { updated[s.id] = status; });
-    setAttendance(updated);
-  };
-
-  const handleToggleAttendance = (stuId: string) => {
-    setAttendance(prev => ({
-      ...prev,
-      [stuId]: getNextAttendanceStatus(prev[stuId])
-    }));
-  };
-
-  const handleAddSamplePhoto = () => {
-    if (photos.length < 3) {
-      setPhotos(prev => [...prev, '/assets/images/module-soil-testing.png']);
-    }
-  };
-
-  const handleRemovePhoto = (index: number) => {
-    setPhotos(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSelectModule = (moduleId: number) => {
-    setSelectedModule(moduleId);
-    const mod = CURRICULUM_MODULES.find(m => m.id === moduleId);
-    if (mod?.topics[0]) {
-      setSelectedTopics([mod.topics[0].title]);
-    }
-  };
-
-  const handleToggleTopic = (topicTitle: string) => {
-    setSelectedTopics(prev => 
-      prev.includes(topicTitle)
-        ? (prev.length > 1 ? prev.filter(tItem => tItem !== topicTitle) : prev)
-        : [...prev, topicTitle]
-    );
-  };
-
-  const handleSubmitDailyUpdate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isValid) return;
-
-    const activeModObj = CURRICULUM_MODULES.find(m => m.id === selectedModule);
-
-    const calculatedStatus = computeDailyLogStatus({
-      submissionTime: new Date(),
-      dayNumber: currentDayNum,
-      schoolCurrentDay: school.currentDay || 1,
-      hoursTaught,
-      plannedHours: 2.5,
-      isDelayed: !!delayReason.trim()
-    });
-
-    const newLog: DailyLog = {
-      id: `LOG-${school.id}-DAY-${String(currentDayNum).padStart(2, '0')}`,
-      schoolId: school.id,
-      date: new Date().toISOString().split('T')[0],
-      dayNumber: currentDayNum,
-      facultyId: `FAC-${school.id}`,
-      facultyName: school.facultyName,
-      moduleNumber: selectedModule,
-      moduleTitle: activeModObj?.title || 'Soil Testing using SoiLENZ Device',
-      topicsCovered: selectedTopics.length > 0 ? selectedTopics : ['Practical Session Completed'],
-      learningDescription: learningDescription.trim() || undefined,
-      sessionType,
-      hoursTaught,
-      plannedHours: 2.5,
-      isDelayed: !!delayReason.trim(),
-      delayReason: delayReason.trim() || undefined,
-      status: calculatedStatus,
-      studentAttendance: attendance,
-      samplesTestedCount: samplesTested,
-      farmersReachedCount: farmersReached,
-      campaignsCount: sessionType === 'Field' ? 1 : 0,
-      stockUsed,
-      incidentNotes: incidentNotes.trim() || undefined,
-      photos,
-      isLocked: false,
-      submittedAt: new Date().toISOString()
+  // Update attendance for a single student
+  const handleUpdateStudent = (studentId: string, status: 'present' | 'absent' | 'late', studentName?: string) => {
+    if (!school) return;
+    const updated = {
+      ...attendance,
+      [studentId]: status
     };
+    setAttendance(updated);
 
-    storageService.saveDailyLog(newLog, currentUser.name);
-    storageService.clearDraftDailyLog();
-
-    // Confetti celebration
-    try {
-      confetti({
-        particleCount: 65,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    } catch {
-      // safe fallback
+    // Save to storage
+    const result = storageService.saveAttendanceForDay(school.id, selectedDay, updated);
+    if (result.success) {
+      // Refresh students to reflect updated cumulative attendance rates
+      setStudents(storageService.getStudents(school.id));
+      setDailyLogs(storageService.getDailyLogs(school.id));
+      setSaveToast(`Day ${selectedDay}: ${studentName || 'Student'} marked ${status.toUpperCase()}`);
     }
-
-    setSuccessNotice(`Day ${currentDayNum} update submitted (${calculatedStatus.replace('_', ' ')})! Attendance and heat map updated.`);
-    setTimeout(() => setSuccessNotice(null), 6000);
   };
 
-  const programPct = Math.round((currentDayNum / 28) * 100);
+  // Bulk actions
+  const handleBulkMark = (status: 'present' | 'absent' | 'late') => {
+    if (!school) return;
+    const updated: Record<string, 'present' | 'absent' | 'late'> = {};
+    students.forEach(s => {
+      updated[s.id] = status;
+    });
+    setAttendance(updated);
+
+    const result = storageService.saveAttendanceForDay(school.id, selectedDay, updated);
+    if (result.success) {
+      setStudents(storageService.getStudents(school.id));
+      setDailyLogs(storageService.getDailyLogs(school.id));
+      setSaveToast(`All 20 students marked ${status.toUpperCase()} for Day ${selectedDay}`);
+    }
+  };
+
+  // Calculate day stats
+  const currentDayStats = useMemo(() => {
+    const total = students.length || 20;
+    const present = Object.values(attendance).filter(v => v === 'present').length;
+    const late = Object.values(attendance).filter(v => v === 'late').length;
+    const absent = Object.values(attendance).filter(v => v === 'absent').length;
+    const rate = total > 0 ? Math.round(((present + late * 0.5) / total) * 100) : 0;
+    return { total, present, late, absent, rate };
+  }, [attendance, students]);
+
+  // Calculate stats for any day number in the heatmap
+  const getDayHeatmapInfo = (day: number) => {
+    const isFuture = day > currentCohortDay;
+    const log = dailyLogs.find(l => l.dayNumber === day);
+
+    if (isFuture) {
+      return {
+        rate: null,
+        status: 'future',
+        bgClass: 'bg-slate-100 dark:bg-slate-800 text-slate-400 border-dashed border-slate-300 dark:border-slate-700'
+      };
+    }
+
+    if (!log || !log.studentAttendance) {
+      return {
+        rate: 0,
+        status: 'missing',
+        bgClass: 'bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800'
+      };
+    }
+
+    const att = log.studentAttendance;
+    const total = Object.keys(att).length || 20;
+    const pres = Object.values(att).filter(v => v === 'present').length;
+    const lat = Object.values(att).filter(v => v === 'late').length;
+    const rate = Math.round(((pres + lat * 0.5) / total) * 100);
+
+    if (rate >= 85) {
+      return {
+        rate,
+        status: 'high',
+        bgClass: 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+      };
+    } else if (rate >= 70) {
+      return {
+        rate,
+        status: 'medium',
+        bgClass: 'bg-amber-400 text-slate-900 border-amber-500 font-semibold'
+      };
+    } else {
+      return {
+        rate,
+        status: 'low',
+        bgClass: 'bg-rose-500 text-white border-rose-600 shadow-xs'
+      };
+    }
+  };
+
+  // Filtered students
+  const filteredStudents = useMemo(() => {
+    return students.filter(s => {
+      const matchSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          s.rollNo.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchTeam = selectedTeamFilter === 'all' || s.groupNumber === selectedTeamFilter;
+      return matchSearch && matchTeam;
+    });
+  }, [students, searchQuery, selectedTeamFilter]);
+
+  // Overall cohort attendance average
+  const overallCohortRate = useMemo(() => {
+    if (students.length === 0) return 94;
+    const sum = students.reduce((acc, curr) => acc + curr.attendanceRate, 0);
+    return Math.round(sum / students.length);
+  }, [students]);
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      {/* Top Stylish Header Card with Program Progress Bar */}
-      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-xs font-black uppercase tracking-wider border border-emerald-200 flex items-center gap-1">
-                <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                <span>Daily Log Engine • 72-Hour Curriculum</span>
-              </span>
-              {draftSavedNotice && (
-                <span className="text-[11px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md font-bold border border-emerald-200 animate-pulse">
-                  {t('log.saved_draft', 'Auto-saved')}
-                </span>
-              )}
-            </div>
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
 
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-              <span>Day {currentDayNum} of 28 Daily Faculty Log</span>
-              <span className="text-sm font-semibold text-slate-500 hidden sm:inline">({school.code})</span>
-            </h1>
-
-            <p className="text-xs text-slate-500 mt-0.5">
-              {school.name} • Faculty Coordinator: <strong className="text-slate-700">{school.facultyName}</strong>
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="px-3.5 py-2 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center gap-2 text-xs font-bold text-emerald-900">
-              <Calendar className="w-4 h-4 text-emerald-700" />
-              <span>Day {currentDayNum} / 28</span>
-            </div>
-            <div className="w-11 h-11 rounded-2xl bg-[#5C26C0]/10 border border-[#5C26C0]/20 flex items-center justify-center shrink-0">
-              <ClipboardCheck className="w-5 h-5 text-[#5C26C0]" />
-            </div>
-          </div>
+      {/* Save Toast */}
+      {saveToast && (
+        <div className="fixed top-6 right-6 z-50 flex items-center gap-2.5 px-4 py-2.5 bg-slate-900 text-white text-xs font-semibold rounded-2xl shadow-xl border border-slate-700 animate-in fade-in slide-in-from-top-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{saveToast}</span>
         </div>
+      )}
 
-        {/* 28-day Progress Bar */}
-        <div className="pt-2 border-t border-slate-100 space-y-1.5">
-          <div className="flex items-center justify-between text-[11px] font-bold text-slate-600">
-            <span>SIL 28-Day Milestone Journey</span>
-            <span className="text-emerald-700 font-extrabold">{programPct}% Completed</span>
+      {/* Executive Header */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-purple-600/20">
+              <CalendarDays className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                  Daily Attendance & 28-Day Heatmap
+                </h1>
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300/60">
+                  Live Sync
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-2">
+                <span>Dr. Anjali Patil (Faculty Coordinator)</span>
+                <span>•</span>
+                <span>{school?.name || "St. Xavier's Model High School"}</span>
+                <span>•</span>
+                <span className="font-semibold text-purple-700 dark:text-purple-300">20 Enrolled Students</span>
+              </p>
+            </div>
           </div>
-          <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-            <div 
-              style={{ width: `${programPct}%` }}
-              className="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-[#5C26C0] rounded-full transition-all duration-500"
-            />
+
+          {/* Quick Metrics Capsule */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="bg-slate-50 dark:bg-slate-800/60 px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 text-center">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Program Day</span>
+              <span className="text-sm font-black text-purple-700 dark:text-purple-300">Day {currentCohortDay} of 28</span>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-800/60 px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 text-center">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Cohort Avg</span>
+              <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">{overallCohortRate}%</span>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-800/60 px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 text-center">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Threshold</span>
+              <span className="text-sm font-black text-indigo-600 dark:text-indigo-400">≥80% for Certificate</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {successNotice && (
-        <div className="p-4 bg-emerald-100 border-2 border-emerald-400 rounded-3xl text-xs sm:text-sm font-black text-emerald-950 flex items-center gap-3 animate-in fade-in shadow-xs">
-          <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-5 h-5" />
+      {/* 28-Day Interactive Attendance Heatmap */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+          <div>
+            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Flame className="w-4 h-4 text-amber-500" />
+              28-Day Cohort Attendance Heatmap
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Click any day below to load, view, or update that day's attendance record.
+            </p>
           </div>
-          <div className="flex-1">
-            <p className="font-extrabold">{successNotice}</p>
-            <p className="text-[11px] text-emerald-800 font-medium">Student attendance statistics and school timeline updated in real-time.</p>
+
+          {/* Legend */}
+          <div className="flex items-center gap-3 text-[11px] font-medium text-slate-600 dark:text-slate-300 flex-wrap">
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-md bg-emerald-600 inline-block shadow-2xs" />
+              ≥85% (High)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-md bg-amber-400 inline-block" />
+              70–84% (Partial)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-md bg-rose-500 inline-block" />
+              &lt;70% (Low)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-md bg-slate-200 dark:bg-slate-700 border border-dashed border-slate-400 inline-block" />
+              Upcoming
+            </span>
           </div>
         </div>
-      )}
 
-      {/* Main Form */}
-      <form onSubmit={handleSubmitDailyUpdate} className="space-y-6">
-        <ModuleFormatSection
-          selectedModule={selectedModule}
-          onSelectModule={handleSelectModule}
-          selectedTopics={selectedTopics}
-          onToggleTopic={handleToggleTopic}
-          learningDescription={learningDescription}
-          onLearningDescriptionChange={setLearningDescription}
-          sessionType={sessionType}
-          onSelectSessionType={setSessionType}
-          hoursTaught={hoursTaught}
-          onHoursChange={setHoursTaught}
-          delayReason={delayReason}
-          onDelayReasonChange={setDelayReason}
-          errors={{
-            hoursTaught: errors.hoursTaught,
-            delayReason: errors.delayReason
-          }}
-        />
+        {/* 4-Week Heatmap Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5">
+          {Array.from({ length: 28 }, (_, i) => i + 1).map(day => {
+            const info = getDayHeatmapInfo(day);
+            const isSelected = selectedDay === day;
+            const isToday = day === currentCohortDay;
 
-        <StudentAttendanceSection
-          students={students}
-          attendance={attendance}
-          onToggleAttendance={handleToggleAttendance}
-          onMarkAll={handleMarkAll}
-          error={errors.attendance}
-        />
+            return (
+              <button
+                key={day}
+                onClick={() => setSelectedDay(day)}
+                type="button"
+                className={`group relative p-2.5 rounded-2xl border text-center transition-all cursor-pointer flex flex-col justify-between items-center min-h-[72px] ${info.bgClass} ${
+                  isSelected 
+                    ? 'ring-4 ring-purple-500/40 ring-offset-2 dark:ring-offset-slate-900 scale-102 z-10 font-bold' 
+                    : 'hover:scale-101 hover:shadow-md'
+                }`}
+              >
+                <div className="flex items-center justify-between w-full text-[10px] opacity-90 font-bold">
+                  <span>Day {day}</span>
+                  {isToday && (
+                    <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-white text-purple-900 font-extrabold shadow-2xs">
+                      Today
+                    </span>
+                  )}
+                </div>
 
-        <LabProgressSection
-          samplesTested={samplesTested}
-          onSamplesChange={setSamplesTested}
-          farmersReached={farmersReached}
-          onFarmersChange={setFarmersReached}
-          stockUsed={stockUsed}
-          onStockChange={setStockUsed}
-          incidentNotes={incidentNotes}
-          onIncidentNotesChange={setIncidentNotes}
-          photos={photos}
-          onAddPhoto={handleAddSamplePhoto}
-          onRemovePhoto={handleRemovePhoto}
-          errors={{
-            samplesTested: errors.samplesTested,
-            farmersReached: errors.farmersReached
-          }}
-        />
+                <div className="text-base font-black my-0.5">
+                  {info.rate !== null ? `${info.rate}%` : '—'}
+                </div>
 
-        {/* Validation Errors Notice */}
-        {!isValid && (
-          <div className="p-4 rounded-3xl bg-rose-50 border border-rose-200 text-rose-900 text-xs font-semibold flex items-center gap-2.5 shadow-xs">
-            <AlertTriangle className="w-5 h-5 shrink-0 text-rose-600" />
-            <span>Please resolve form errors before submitting: {Object.values(errors).join(' ')}</span>
-          </div>
-        )}
-
-        {/* Submit Button */}
-        <div className="pt-2">
-          <button
-            type="submit"
-            disabled={!isValid}
-            className={`w-full py-4 px-6 rounded-2xl font-black text-sm flex items-center justify-center gap-2.5 shadow-md transition-all min-h-[54px] cursor-pointer ${
-              isValid
-                ? 'bg-emerald-700 hover:bg-emerald-800 active:scale-98 text-white'
-                : 'bg-slate-300 text-slate-500 cursor-not-allowed opacity-60'
-            }`}
-          >
-            <Send className="w-4 h-4" />
-            <span>{t('log.submit_btn', `Submit Day ${currentDayNum} Daily Log & Update Attendance`)}</span>
-            <Sparkles className="w-4 h-4 text-amber-300" />
-          </button>
+                <div className="text-[9px] tracking-tight opacity-80 uppercase font-semibold">
+                  {isSelected ? 'Viewing' : (info.rate !== null ? `${Math.round(info.rate * 0.2)} / 20 Pres` : 'Scheduled')}
+                </div>
+              </button>
+            );
+          })}
         </div>
-      </form>
+      </div>
+
+      {/* Selected Day Control & Quick Bulk Actions */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-xs space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          
+          {/* Day Navigation */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700">
+              <button
+                onClick={() => setSelectedDay(Math.max(1, selectedDay - 1))}
+                disabled={selectedDay <= 1}
+                className="p-1.5 rounded-xl hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer"
+                title="Previous Day"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              
+              <span className="px-3 text-xs font-bold text-slate-900 dark:text-white">
+                Day {selectedDay} of 28
+              </span>
+
+              <button
+                onClick={() => setSelectedDay(Math.min(28, selectedDay + 1))}
+                disabled={selectedDay >= 28}
+                className="p-1.5 rounded-xl hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer"
+                title="Next Day"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            {selectedDay !== currentCohortDay && (
+              <button
+                onClick={() => setSelectedDay(currentCohortDay)}
+                className="px-3 py-1.5 text-xs font-bold rounded-2xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 transition-all cursor-pointer"
+              >
+                Jump to Today (Day {currentCohortDay})
+              </button>
+            )}
+
+            <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+              <Clock className="w-3.5 h-3.5 text-purple-600" />
+              <span>{selectedDay === currentCohortDay ? "Today's Active Session" : `Historical Record for Day ${selectedDay}`}</span>
+            </div>
+          </div>
+
+          {/* Day Stats Pills */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center gap-1.5">
+              <Check className="w-3.5 h-3.5" />
+              {currentDayStats.present} Present
+            </span>
+            <span className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-xs font-bold flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5" />
+              {currentDayStats.late} Late
+            </span>
+            <span className="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-bold flex items-center gap-1.5">
+              <XCircle className="w-3.5 h-3.5" />
+              {currentDayStats.absent} Absent
+            </span>
+            <span className="px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-black">
+              {currentDayStats.rate}% Day Rate
+            </span>
+          </div>
+
+          {/* Quick Bulk Actions */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => handleBulkMark('present')}
+              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Mark All Present
+            </button>
+            <button
+              onClick={() => handleBulkMark('late')}
+              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+            >
+              <Clock className="w-3.5 h-3.5" />
+              All Late
+            </button>
+            <button
+              onClick={() => handleBulkMark('absent')}
+              className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+            >
+              <XCircle className="w-3.5 h-3.5" />
+              All Absent
+            </button>
+          </div>
+        </div>
+
+        {/* Search & Team Filter Bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <div className="relative w-full sm:w-72">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search student or roll number..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+            <button
+              onClick={() => setSelectedTeamFilter('all')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                selectedTeamFilter === 'all'
+                  ? 'bg-purple-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              All Cohort (20)
+            </button>
+            {[1, 2, 3, 4, 5].map(teamNum => (
+              <button
+                key={teamNum}
+                onClick={() => setSelectedTeamFilter(teamNum)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                  selectedTeamFilter === teamNum
+                    ? 'bg-purple-600 text-white shadow-xs'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                Team {teamNum}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Student Attendance Roster Cards */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+            <Users className="w-4 h-4 text-purple-600" />
+            Student Attendance Roster ({filteredStudents.length} Students)
+          </h3>
+          <span className="text-xs text-slate-500">
+            Click status pills to toggle attendance • Auto-saved instantly
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {filteredStudents.map((stu) => {
+            const currentStatus = attendance[stu.id] || 'present';
+            const isEligible = stu.attendanceRate >= 80;
+
+            return (
+              <div 
+                key={stu.id}
+                className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/90 dark:border-slate-800 hover:border-purple-300 dark:hover:border-purple-700 transition-all shadow-xs flex flex-col justify-between gap-3"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={stu.avatar} 
+                      alt={stu.name} 
+                      className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-0.5 object-cover"
+                    />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-slate-900 dark:text-white">
+                          {stu.name}
+                        </span>
+                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">
+                          {stu.rollNo}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
+                        <span>Class {stu.classGrade}</span>
+                        <span>•</span>
+                        <span className="font-semibold text-purple-700 dark:text-purple-300">
+                          Team {stu.groupNumber}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cumulative Attendance & Certificate Eligibility */}
+                  <div className="text-right">
+                    <div className="text-xs font-black text-slate-900 dark:text-white">
+                      {stu.attendanceRate}% Overall
+                    </div>
+                    <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full mt-0.5 ${
+                      isEligible 
+                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800' 
+                        : 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
+                    }`}>
+                      {isEligible ? (
+                        <>
+                          <Check className="w-2.5 h-2.5" />
+                          Cert Eligible
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="w-2.5 h-2.5" />
+                          &lt;80% Risk
+                        </>
+                      )}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3-Way Tactical Attendance Selector */}
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    onClick={() => handleUpdateStudent(stu.id, 'present', stu.name)}
+                    type="button"
+                    className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      currentStatus === 'present'
+                        ? 'bg-emerald-600 text-white shadow-xs scale-101 ring-2 ring-emerald-500/30'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 hover:text-emerald-700'
+                    }`}
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    Present
+                  </button>
+
+                  <button
+                    onClick={() => handleUpdateStudent(stu.id, 'late', stu.name)}
+                    type="button"
+                    className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      currentStatus === 'late'
+                        ? 'bg-amber-500 text-white shadow-xs scale-101 ring-2 ring-amber-500/30'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-amber-50 hover:text-amber-700'
+                    }`}
+                  >
+                    <Clock className="w-3.5 h-3.5" />
+                    Late
+                  </button>
+
+                  <button
+                    onClick={() => handleUpdateStudent(stu.id, 'absent', stu.name)}
+                    type="button"
+                    className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      currentStatus === 'absent'
+                        ? 'bg-rose-600 text-white shadow-xs scale-101 ring-2 ring-rose-500/30'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-rose-50 hover:text-rose-700'
+                    }`}
+                  >
+                    <XCircle className="w-3.5 h-3.5" />
+                    Absent
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
     </div>
   );
 };

@@ -182,6 +182,15 @@ export class StorageService {
     return saved;
   }
 
+  public saveAttendanceForDay(
+    schoolId: string,
+    dayNumber: number,
+    attendanceMap: Record<string, 'present' | 'absent' | 'late'>
+  ): { success: boolean; stats: { present: number; absent: number; late: number; rate: number } } {
+    this.init();
+    return dailyLogStorage.saveAttendanceForDay(schoolId, dayNumber, attendanceMap);
+  }
+
   public getDraftDailyLog(): Partial<DailyLog> | null {
     this.init();
     return dailyLogStorage.getDraftDailyLog();

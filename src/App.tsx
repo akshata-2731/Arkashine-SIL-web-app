@@ -32,9 +32,6 @@ const PrincipalCertificates = lazy(() => import('./pages/principal/PrincipalCert
 
 // Faculty Pages (Lazy loaded)
 const FacultyToday = lazy(() => import('./pages/faculty/FacultyToday').then(m => ({ default: m.FacultyToday })));
-const FacultyStudents = lazy(() => import('./pages/faculty/FacultyStudents').then(m => ({ default: m.FacultyStudents })));
-const FacultySoilLab = lazy(() => import('./pages/faculty/FacultySoilLab').then(m => ({ default: m.FacultySoilLab })));
-const FacultyOutreach = lazy(() => import('./pages/faculty/FacultyOutreach').then(m => ({ default: m.FacultyOutreach })));
 
 // Student Pages (Lazy loaded)
 const StudentJourney = lazy(() => import('./pages/student/StudentJourney').then(m => ({ default: m.StudentJourney })));
@@ -235,7 +232,7 @@ const MainLayout: React.FC = () => {
                 }
               />
 
-              {/* Faculty Coordinator Routes */}
+              {/* Faculty Coordinator Routes (Single-Screen Attendance & Heatmap Console) */}
               <Route path="/faculty" element={<Navigate to="/faculty/today" replace />} />
               <Route
                 path="/faculty/today"
@@ -245,30 +242,9 @@ const MainLayout: React.FC = () => {
                   </RoleRouteGuard>
                 }
               />
-              <Route
-                path="/faculty/students"
-                element={
-                  <RoleRouteGuard allowedRole="faculty">
-                    <FacultyStudents />
-                  </RoleRouteGuard>
-                }
-              />
-              <Route
-                path="/faculty/soillab"
-                element={
-                  <RoleRouteGuard allowedRole="faculty">
-                    <FacultySoilLab />
-                  </RoleRouteGuard>
-                }
-              />
-              <Route
-                path="/faculty/outreach"
-                element={
-                  <RoleRouteGuard allowedRole="faculty">
-                    <FacultyOutreach />
-                  </RoleRouteGuard>
-                }
-              />
+              <Route path="/faculty/students" element={<Navigate to="/faculty/today" replace />} />
+              <Route path="/faculty/soillab" element={<Navigate to="/faculty/today" replace />} />
+              <Route path="/faculty/outreach" element={<Navigate to="/faculty/today" replace />} />
 
               {/* Student Portal Routes */}
               <Route path="/student" element={<Navigate to="/student/journey" replace />} />

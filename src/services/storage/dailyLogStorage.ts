@@ -54,21 +54,78 @@ export class DailyLogStorage {
         schoolLogs.forEach(sl => {
           if (sl.studentAttendance && sl.studentAttendance[stu.id]) {
             loggedDays++;
-            if (sl.studentAttendance[stu.id] === 'present' || sl.studentAttendance[stu.id] === 'late') {
-              presentDays++;
+            if (sl.studentAttendance[stu.id] === 'present') {
+              presentDays += 1;
+            } else if (sl.studentAttendance[stu.id] === 'late') {
+              presentDays += 0.5;
             }
           }
         });
         if (loggedDays > 0) {
-          stu.totalPresentDays = presentDays;
+          stu.totalPresentDays = Math.round(presentDays);
           stu.totalLoggedDays = loggedDays;
           stu.attendanceRate = Math.round((presentDays / loggedDays) * 100);
+          stu.certificateStatus = stu.attendanceRate >= 80 ? 'Eligible' : 'Not_Eligible';
           studentStorage.saveStudent(stu);
         }
       });
     }
 
     return log;
+  }
+
+  // --- SAVE ATTENDANCE FOR ANY DAY & RECALCULATE STUDENT RATES ---
+  public saveAttendanceForDay(
+    schoolId: string,
+    dayNumber: number,
+    attendanceMap: Record<string, 'present' | 'absent' | 'late'>
+  ): { success: boolean; stats: { present: number; absent: number; late: number; rate: number } } {
+    const list = this.getDailyLogs();
+    let log = list.find(l => l.schoolId === schoolId && l.dayNumber === dayNumber);
+    
+    if (!log) {
+      log = {
+        id: `LOG-${schoolId}-D${dayNumber}`,
+        schoolId,
+        date: new Date().toISOString().split('T')[0],
+        dayNumber,
+        facultyId: 'USR-FAC-01',
+        facultyName: 'Dr. Anjali Patil',
+        moduleNumber: Math.min(6, Math.ceil(dayNumber / 4.5)),
+        moduleTitle: `Module ${Math.min(6, Math.ceil(dayNumber / 4.5))}: Hands-on Soil Testing`,
+        topicsCovered: ['Daily Student Lab Attendance & Sample Prep'],
+        sessionType: 'Practical',
+        hoursTaught: 2.5,
+        plannedHours: 2.5,
+        isDelayed: false,
+        status: 'On_Time',
+        studentAttendance: { ...attendanceMap },
+        samplesTestedCount: 12,
+        farmersReachedCount: 15,
+        campaignsCount: 1,
+        stockUsed: 'Standard daily test reagents',
+        photos: ['/assets/images/module-soil-testing.png'],
+        isLocked: false,
+        submittedAt: new Date().toISOString()
+      };
+    } else {
+      log.studentAttendance = { ...attendanceMap };
+      log.status = 'On_Time';
+      log.submittedAt = new Date().toISOString();
+    }
+
+    this.saveDailyLog(log);
+
+    const total = Object.keys(attendanceMap).length || 20;
+    const present = Object.values(attendanceMap).filter(v => v === 'present').length;
+    const late = Object.values(attendanceMap).filter(v => v === 'late').length;
+    const absent = Object.values(attendanceMap).filter(v => v === 'absent').length;
+    const rate = Math.round(((present + late * 0.5) / total) * 100);
+
+    return {
+      success: true,
+      stats: { present, absent, late, rate }
+    };
   }
 
   // --- DRAFT DAILY LOG (for offline resilience) ---

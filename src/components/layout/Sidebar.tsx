@@ -11,7 +11,6 @@ import {
   Award, 
   FlaskConical, 
   TrendingUp,
-  MapPin,
   Compass,
   Microscope,
   Film,
@@ -76,10 +75,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ];
       case 'faculty':
         return [
-          { id: 'today', label: t('nav.today', "Today's Update"), icon: ClipboardCheck, badge: 'Daily' },
-          { id: 'students', label: t('nav.faculty_students', 'Students & Attendance'), icon: Users },
-          { id: 'soillab', label: t('nav.soillab', 'Soil Lab (SoiLENZ)'), icon: FlaskConical },
-          { id: 'outreach', label: t('nav.faculty_outreach', 'Outreach & Campaigns'), icon: MapPin }
+          { id: 'today', label: t('nav.attendance_heatmap', 'Daily Attendance & Heatmap'), icon: CalendarDays, badge: 'Live' }
         ];
       case 'student':
         return [
