@@ -79,12 +79,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ];
       case 'student':
         return [
-          { id: 'journey', label: t('nav.student_journey', 'My Soil Journey'), icon: Compass },
-          { id: 'videos', label: t('nav.student_videos', 'Animated Video Lessons'), icon: Film },
-          { id: 'diagrams', label: t('nav.student_diagrams', 'Soil Explorer & Diagrams'), icon: Microscope },
-          { id: 'modules', label: t('nav.student_modules', 'Modules & Quizzes'), icon: FlaskConical },
-          { id: 'badges', label: t('nav.student_badges', 'Badges & Rewards'), icon: Award },
-          { id: 'certificate', label: t('nav.student_cert', 'Soil Partner Certificate'), icon: FileCheck2 }
+          { id: 'journey', label: 'Soil Journey & Lab', icon: Compass },
+          { id: 'videos', label: 'Learning Videos', icon: Film, badge: '6 Vids' },
+          { id: 'lab', label: 'Why Test Soil & pH', icon: Microscope },
+          { id: 'modules', label: 'Study Modules (6)', icon: FlaskConical },
+          { id: 'quiz', label: 'Soil Doctor Quiz', icon: Award },
+          { id: 'certificate', label: 'Soil Partner Certificate', icon: FileCheck2 }
         ];
       default:
         return [];

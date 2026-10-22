@@ -4,7 +4,7 @@ import {
   XCircle, 
   Award, 
   RefreshCw, 
-  ArrowRight
+  ArrowRight, 
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 

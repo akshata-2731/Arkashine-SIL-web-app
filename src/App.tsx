@@ -265,6 +265,14 @@ const MainLayout: React.FC = () => {
                 }
               />
               <Route
+                path="/student/lab"
+                element={
+                  <RoleRouteGuard allowedRole="student">
+                    <StudentJourney currentTab="lab" onTabChange={(tab) => navigate(`/student/${tab}`)} />
+                  </RoleRouteGuard>
+                }
+              />
+              <Route
                 path="/student/modules"
                 element={
                   <RoleRouteGuard allowedRole="student">
@@ -273,26 +281,10 @@ const MainLayout: React.FC = () => {
                 }
               />
               <Route
-                path="/student/diagrams"
+                path="/student/quiz"
                 element={
                   <RoleRouteGuard allowedRole="student">
-                    <StudentJourney currentTab="diagrams" onTabChange={(tab) => navigate(`/student/${tab}`)} />
-                  </RoleRouteGuard>
-                }
-              />
-              <Route
-                path="/student/ecosystem"
-                element={
-                  <RoleRouteGuard allowedRole="student">
-                    <StudentJourney currentTab="diagrams" onTabChange={(tab) => navigate(`/student/${tab}`)} />
-                  </RoleRouteGuard>
-                }
-              />
-              <Route
-                path="/student/badges"
-                element={
-                  <RoleRouteGuard allowedRole="student">
-                    <StudentJourney currentTab="badges" onTabChange={(tab) => navigate(`/student/${tab}`)} />
+                    <StudentJourney currentTab="quiz" onTabChange={(tab) => navigate(`/student/${tab}`)} />
                   </RoleRouteGuard>
                 }
               />
@@ -304,6 +296,9 @@ const MainLayout: React.FC = () => {
                   </RoleRouteGuard>
                 }
               />
+              <Route path="/student/diagrams" element={<Navigate to="/student/lab" replace />} />
+              <Route path="/student/badges" element={<Navigate to="/student/certificate" replace />} />
+              <Route path="/student/ecosystem" element={<Navigate to="/student/lab" replace />} />
 
               {/* 404 Route */}
               <Route path="*" element={<NotFoundPage />} />

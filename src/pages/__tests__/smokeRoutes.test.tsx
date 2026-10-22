@@ -78,6 +78,6 @@ describe('Role Home Views Smoke Tests', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/Your Soil Health Journey/i)).toBeInTheDocument();
+    expect(screen.getByText(/Hands-on Soil Testing Journey/i)).toBeInTheDocument();
   });
 });
