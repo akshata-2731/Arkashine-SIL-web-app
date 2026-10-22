@@ -6,7 +6,8 @@ import {
   CheckCircle2, 
   UserPlus,
   X,
-  AlertTriangle
+  AlertTriangle,
+  GraduationCap
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { Student } from '../../types';
@@ -93,7 +94,9 @@ export const StudentSelection: React.FC = () => {
       capstoneSubmitted: false,
       missingFields: [],
       badgeIds: [],
-      certificateStatus: 'Incomplete_Data'
+      certificateStatus: 'Incomplete_Data',
+      parentConsentSigned: true,
+      parentConsentDate: '2026-05-28'
     };
 
     storageService.saveStudent(newStudent);
@@ -109,25 +112,28 @@ export const StudentSelection: React.FC = () => {
       {/* Top Header */}
       <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <Users className="w-5 h-5 text-emerald-700" />
             <h2 className="text-xl font-bold text-slate-800 tracking-tight">
               Student Screening & Cohort Selection Funnel
             </h2>
+            <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
+              Merit Enrolled: {students.length} of 18 Target
+            </span>
           </div>
           <p className="text-xs text-slate-500">
-            Rigorous merit screening: 80-150 registered → Innovation Quiz → Practical assignment → Final 18 selected (5 groups of 4).
+            Rigorous merit screening: 80-150 registered → Innovation Quiz → Practical assignment → Final 18 selected (5 micro-teams).
           </p>
         </div>
 
         {/* School Dropdown & Add Candidate */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-slate-500">School:</span>
             <select
               value={selectedSchoolId}
               onChange={(e) => setSelectedSchoolId(e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800"
+              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-emerald-600"
             >
               {schools.map(s => (
                 <option key={s.id} value={s.id}>{s.name} ({s.code})</option>
@@ -137,7 +143,7 @@ export const StudentSelection: React.FC = () => {
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            className="px-3.5 py-2 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
           >
             <UserPlus className="w-4 h-4" />
             Add Candidate
@@ -146,10 +152,15 @@ export const StudentSelection: React.FC = () => {
       </div>
 
       {/* Visual Selection Funnel Graphic */}
-      <div className="bg-gradient-to-br from-emerald-900 to-[#143D30] rounded-3xl p-6 text-white shadow-md">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-300 mb-4">
-          Selection Funnel Architecture
-        </h3>
+      <div className="bg-gradient-to-br from-emerald-900 via-teal-900 to-[#143D30] rounded-3xl p-6 text-white shadow-md">
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-300">
+            Selection Funnel Architecture (Merit Progression)
+          </h3>
+          <span className="text-xs text-emerald-200 bg-white/10 px-2.5 py-1 rounded-lg">
+            Final Target: Top 18 Selected per School
+          </span>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-center">
           
@@ -197,14 +208,57 @@ export const StudentSelection: React.FC = () => {
         </div>
       </div>
 
+      {/* Pictorial 5 Micro-Team Archetype Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        {[
+          { num: 1, name: 'Soil Explorers', icon: '🌱', task: 'GPS Auger Sampling & Horizon Layer Tests' },
+          { num: 2, name: 'Earth Guardians', icon: '🛡️', task: 'Living Soil Biology & Organic Carbon' },
+          { num: 3, name: 'Carbon Trackers', icon: '📊', task: 'Texture Ribbons & Lab Sample Sieving' },
+          { num: 4, name: 'Bio Innovators', icon: '🔬', task: 'SoiLENZ Spectrometry & Reagent Dishes' },
+          { num: 5, name: 'Agro Scientists', icon: '🌾', task: 'Village Health Cards & Farmer Advisory' }
+        ].map(team => (
+          <div
+            key={team.num}
+            onClick={() => setSelectedGroup(selectedGroup === team.num ? 'all' : team.num)}
+            className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
+              selectedGroup === team.num
+                ? 'bg-emerald-800 text-white border-emerald-900 shadow-md ring-2 ring-emerald-400'
+                : 'bg-white hover:bg-slate-50 border-slate-200/90 text-slate-800'
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-lg">{team.icon}</span>
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                  selectedGroup === team.num ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                }`}>
+                  Team {team.num}
+                </span>
+              </div>
+              <h4 className="font-extrabold text-xs">{team.name}</h4>
+              <p className={`text-[10px] mt-1 leading-tight ${
+                selectedGroup === team.num ? 'text-emerald-100' : 'text-slate-500'
+              }`}>
+                {team.task}
+              </p>
+            </div>
+            <span className={`text-[10px] font-bold mt-2 block ${
+              selectedGroup === team.num ? 'text-emerald-200' : 'text-emerald-700'
+            }`}>
+              {students.filter(s => s.groupNumber === team.num).length} Students Assigned
+            </span>
+          </div>
+        ))}
+      </div>
+
       {/* Filter Row: Team Buttons & Search */}
       <div className="bg-white rounded-2xl p-4 border border-slate-200/90 flex items-center justify-between flex-wrap gap-3 text-xs">
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="font-semibold text-slate-500 mr-1">Filter Team:</span>
           <button
             onClick={() => setSelectedGroup('all')}
-            className={`px-3 py-1 rounded-lg font-medium transition-colors cursor-pointer ${
-              selectedGroup === 'all' ? 'bg-emerald-800 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            className={`px-3 py-1.5 rounded-xl font-bold transition-colors cursor-pointer ${
+              selectedGroup === 'all' ? 'bg-emerald-800 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
             All Students ({students.length})
@@ -213,8 +267,8 @@ export const StudentSelection: React.FC = () => {
             <button
               key={g}
               onClick={() => setSelectedGroup(g)}
-              className={`px-3 py-1 rounded-lg font-medium transition-colors cursor-pointer ${
-                selectedGroup === g ? 'bg-emerald-800 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              className={`px-3 py-1.5 rounded-xl font-bold transition-colors cursor-pointer ${
+                selectedGroup === g ? 'bg-emerald-800 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               Team {g}: {groupNames[g]}
@@ -229,7 +283,7 @@ export const StudentSelection: React.FC = () => {
             placeholder="Search student name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 w-52 focus:outline-hidden focus:border-emerald-500"
+            className="pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 w-52 focus:outline-hidden focus:border-emerald-600"
           />
         </div>
       </div>
@@ -245,6 +299,7 @@ export const StudentSelection: React.FC = () => {
                 <th className="p-3.5">Quiz Score</th>
                 <th className="p-3.5">Assignment Score</th>
                 <th className="p-3.5">Attendance</th>
+                <th className="p-3.5">Parent Consent</th>
                 <th className="p-3.5">Selection Status</th>
               </tr>
             </thead>
@@ -269,22 +324,35 @@ export const StudentSelection: React.FC = () => {
                       Team {s.groupNumber}: {groupNames[s.groupNumber]}
                     </span>
                   </td>
-                  <td className="p-3.5 font-bold text-slate-800">
-                    {s.quizScore} / 100
+                  <td className="p-3.5">
+                    <span className="font-bold text-slate-800">{s.quizScore} / 100</span>
                   </td>
-                  <td className="p-3.5 font-bold text-emerald-800">
-                    {s.assignmentScore} / 100
+                  <td className="p-3.5">
+                    <span className="font-bold text-emerald-800">{s.assignmentScore} / 100</span>
                   </td>
                   <td className="p-3.5 font-bold text-slate-800">
                     {s.attendanceRate}%
                   </td>
                   <td className="p-3.5">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                      Signed & Verified
+                    </span>
+                  </td>
+                  <td className="p-3.5">
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-semibold">
-                      <CheckCircle2 className="w-3 h-3" /> Selected Cohort
+                      <GraduationCap className="w-3 h-3 text-emerald-700" /> Selected Cohort
                     </span>
                   </td>
                 </tr>
               ))}
+              {filteredStudents.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-slate-400">
+                    No candidates found matching the selected filters.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -301,7 +369,7 @@ export const StudentSelection: React.FC = () => {
               </div>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700"
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 cursor-pointer"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />
@@ -433,7 +501,7 @@ export const StudentSelection: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold"
+                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -442,7 +510,7 @@ export const StudentSelection: React.FC = () => {
                   disabled={!isFormValid}
                   className={`px-4 py-2 font-bold rounded-xl shadow-xs transition-colors ${
                     isFormValid
-                      ? 'bg-emerald-700 hover:bg-emerald-800 text-white cursor-pointer'
+                      ? 'bg-emerald-800 hover:bg-emerald-900 text-white cursor-pointer'
                       : 'bg-slate-300 text-slate-500 cursor-not-allowed opacity-60'
                   }`}
                 >
