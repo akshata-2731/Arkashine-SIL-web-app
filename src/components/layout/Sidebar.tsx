@@ -63,7 +63,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           { id: 'overview', label: t('nav.overview', 'Overview'), icon: LayoutDashboard },
           { id: 'schools', label: t('nav.partner_schools', 'My Schools & Lab Setup'), icon: SchoolIcon },
           { id: 'selection', label: t('nav.selection', 'Student Selection'), icon: Users },
-          { id: 'heatmap', label: t('nav.partner_heatmap', 'Daily Updates & Heat Map'), icon: CalendarDays },
           { id: 'outreach', label: t('nav.outreach', 'Outreach & Support'), icon: Sprout }
         ];
       case 'principal':

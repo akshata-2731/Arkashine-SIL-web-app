@@ -175,17 +175,7 @@ const MainLayout: React.FC = () => {
               />
               <Route
                 path="/partner/heatmap"
-                element={
-                  <RoleRouteGuard allowedRole="partner">
-                    <div className="space-y-4">
-                      <CalendarHeatmap
-                        schools={schools}
-                        role="partner"
-                        onSelectSchoolTimeline={setSelectedSchoolTimeline}
-                      />
-                    </div>
-                  </RoleRouteGuard>
-                }
+                element={<Navigate to="/partner/overview" replace />}
               />
               <Route
                 path="/partner/outreach"

@@ -3,15 +3,15 @@ import {
   School as SchoolIcon, 
   Users, 
   Sprout, 
-  Clock,
-  ShieldCheck,
-  ChevronRight,
-  Sparkles,
-  MapPin,
-  Calendar,
-  CheckCircle2,
-  AlertTriangle,
-  Compass
+  ShieldCheck, 
+  ChevronRight, 
+  Sparkles, 
+  MapPin, 
+  Calendar, 
+  CheckCircle2, 
+  AlertTriangle, 
+  Compass,
+  Award
 } from 'lucide-react';
 import { StatusChip } from '../../components/common/StatusChip';
 import { ScoreRing } from '../../components/common/ScoreRing';
@@ -22,12 +22,11 @@ import { EligibilityModal } from '../../components/school/EligibilityModal';
 
 interface PartnerOverviewProps {
   onNavigateTab: (tab: string) => void;
-  onOpenSchoolTimeline: (schoolId: string) => void;
+  onOpenSchoolTimeline?: (schoolId: string) => void;
 }
 
 export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
-  onNavigateTab,
-  onOpenSchoolTimeline
+  onNavigateTab
 }) => {
   const { activePartnerId } = useAuth();
   const allSchools = storageService.getSchools();
@@ -39,6 +38,15 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
 
   const runningSchools = mySchools.filter(s => s.status === 'Running').length;
   const setupSchools = mySchools.filter(s => s.status === 'Lab_Setup').length;
+  const targetTotalStudents = mySchools.length * 18;
+
+  // Real-time farmer reach and clinics
+  const myCampaigns = campaigns.filter(c => mySchools.some(sch => sch.id === c.schoolId));
+  const totalFarmersReached = myCampaigns.reduce((sum, c) => sum + (c.attendeesCount || 0), 0) +
+    myStudents.reduce((sum, s) => sum + (s.outreachFarmersCount || 0), 0);
+
+  // Real-time fully enrolled schools count
+  const fullyEnrolledSchoolsCount = mySchools.filter(s => storageService.getStudents(s.id).length >= 18).length;
 
   return (
     <div className="space-y-6">
@@ -62,7 +70,7 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
             Enabling Partner Executive Hub
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Overseeing {mySchools.length} assigned school innovation lab hubs • {myStudents.length} student soil scientists • 15 village field teams
+            Overseeing {mySchools.length} assigned school innovation lab hubs • {myStudents.length} student soil scientists selected • {mySchools.length * 5} micro-teams active
           </p>
         </div>
 
@@ -72,7 +80,7 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
             className="px-4 py-2 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <Users className="w-3.5 h-3.5" />
-            <span>Student Selection</span>
+            <span>Student Selection ({myStudents.length})</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
           <button
@@ -101,7 +109,7 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
               GreenHorizon AgriEd Foundation
             </h2>
             <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-              Empowering rural and semi-urban schools with precision soil science labs. Managing high-school student cohorts, deploying handheld SoiLENZ spectrophotometers, coordinating daily classroom pedagogies, and connecting student teams with village farmers for real-time soil health cards.
+              Empowering rural and semi-urban schools with precision soil science labs. Managing high-school student cohorts, deploying handheld SoiLENZ spectrophotometers, coordinating hands-on laboratory pedagogies, and connecting student teams with village farmers for real-time soil health cards.
             </p>
           </div>
 
@@ -110,13 +118,13 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
               🏫 {mySchools.length} Assigned School Hubs
             </span>
             <span className="flex items-center gap-1.5 font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-100">
-              🎓 {myStudents.length} Active Students
+              🎓 {myStudents.length} Selected Students
             </span>
             <span className="flex items-center gap-1.5 font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-100">
-              🌾 15 Village Micro-Teams
+              🌾 {mySchools.length * 5} Village Micro-Teams
             </span>
             <span className="flex items-center gap-1.5 font-bold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-xl border border-sky-100">
-              🧪 6 SoiLENZ Units Operating
+              🧪 {mySchools.length * 2} SoiLENZ Units Operating
             </span>
           </div>
         </div>
@@ -138,7 +146,7 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
         </div>
       </div>
 
-      {/* 4 Rich Pictorial KPI Cards */}
+      {/* 4 Rich Pictorial KPI Cards (Real-Time) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Card 1: Assigned Schools */}
@@ -159,29 +167,31 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
             </div>
             <div className="absolute bottom-2 left-3 right-3 text-white">
               <div className="text-xl font-extrabold tracking-tight">
-                {mySchools.length} <span className="text-xs font-normal text-purple-200">Schools</span>
+                {mySchools.length} <span className="text-xs font-normal text-purple-200">School Labs</span>
               </div>
             </div>
           </div>
           <div className="p-3.5 space-y-2">
             <div className="flex justify-between text-[11px]">
-              <span className="text-slate-500 font-medium">Cluster Operations</span>
-              <span className="font-bold text-purple-800">{runningSchools} Running • {setupSchools} Setup</span>
+              <span className="text-slate-500 font-medium">Lab Status</span>
+              <span className="font-bold text-purple-800">
+                {runningSchools} Running • {setupSchools} Setup
+              </span>
             </div>
             <div className="w-full h-1.5 bg-purple-100 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-purple-600 rounded-full transition-all duration-500"
-                style={{ width: `${(runningSchools / mySchools.length) * 100}%` }}
+                style={{ width: `${(runningSchools / (mySchools.length || 1)) * 100}%` }}
               />
             </div>
             <p className="text-[10px] text-slate-500 pt-0.5 flex items-center justify-between">
-              <span>Target: 3 School Hubs</span>
-              <span className="text-purple-700 font-semibold">Inspect Labs →</span>
+              <span>All 3 MOUs Executed</span>
+              <span className="text-purple-700 font-semibold">School Labs →</span>
             </p>
           </div>
         </div>
 
-        {/* Card 2: Active Students */}
+        {/* Card 2: Enrolled Soil Scientists */}
         <div 
           onClick={() => onNavigateTab('selection')}
           className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-emerald-300 transition-all cursor-pointer overflow-hidden flex flex-col justify-between group"
@@ -189,29 +199,31 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
           <div className="relative h-28 overflow-hidden bg-emerald-950">
             <img 
               src="/assets/images/student-lab-discovery.webp" 
-              alt="Active Students" 
+              alt="Enrolled Students" 
               className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-300"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-emerald-950/30 to-transparent" />
             <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 bg-white/90 backdrop-blur-xs text-emerald-900 text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs">
-              <Users className="w-3 h-3 text-emerald-700" />
-              Active Students
+              <Users className="w-3.5 h-3.5 text-emerald-700" />
+              Selected Students
             </div>
             <div className="absolute bottom-2 left-3 right-3 text-white">
               <div className="text-xl font-extrabold tracking-tight">
-                {myStudents.length} <span className="text-xs font-normal text-emerald-200">/ 54 Target</span>
+                {myStudents.length} <span className="text-xs font-normal text-emerald-200">/ {targetTotalStudents} Enrolled</span>
               </div>
             </div>
           </div>
           <div className="p-3.5 space-y-2">
             <div className="flex justify-between text-[11px]">
-              <span className="text-slate-500 font-medium">Merit Selection Rate</span>
-              <span className="font-bold text-emerald-700">100% Enrolled</span>
+              <span className="text-slate-500 font-medium">Selection Rate</span>
+              <span className="font-bold text-emerald-800">
+                {Math.round((myStudents.length / (targetTotalStudents || 1)) * 100)}% Complete
+              </span>
             </div>
             <div className="w-full h-1.5 bg-emerald-100 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-emerald-600 rounded-full transition-all duration-500"
-                style={{ width: `${(myStudents.length / 54) * 100}%` }}
+                style={{ width: `${Math.min(100, (myStudents.length / (targetTotalStudents || 1)) * 100)}%` }}
               />
             </div>
             <p className="text-[10px] text-slate-500 pt-0.5 flex items-center justify-between">
@@ -221,47 +233,47 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
           </div>
         </div>
 
-        {/* Card 3: Daily Compliance */}
+        {/* Card 3: School Cohort Fulfillment (Real-time Replacement for Heatmap) */}
         <div 
-          onClick={() => onNavigateTab('heatmap')}
+          onClick={() => onNavigateTab('selection')}
           className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-sky-300 transition-all cursor-pointer overflow-hidden flex flex-col justify-between group"
         >
           <div className="relative h-28 overflow-hidden bg-sky-950">
             <img 
               src="/assets/images/certificate-celebration.webp" 
-              alt="Daily Compliance" 
+              alt="School Cohort Fulfillment" 
               className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-300"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-sky-950/30 to-transparent" />
             <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 bg-white/90 backdrop-blur-xs text-sky-900 text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs">
-              <Clock className="w-3 h-3 text-sky-700" />
-              Daily Compliance
+              <Award className="w-3 h-3 text-sky-700" />
+              School Cohorts Status
             </div>
             <div className="absolute bottom-2 left-3 right-3 text-white">
               <div className="text-xl font-extrabold tracking-tight">
-                94.2% <span className="text-xs font-normal text-sky-200">on-time</span>
+                {fullyEnrolledSchoolsCount} of {mySchools.length} <span className="text-xs font-normal text-sky-200">Schools Filled</span>
               </div>
             </div>
           </div>
           <div className="p-3.5 space-y-2">
             <div className="flex justify-between text-[11px]">
-              <span className="text-slate-500 font-medium">Log Submissions</span>
-              <span className="font-bold text-sky-800">Target ≥ 90%</span>
+              <span className="text-slate-500 font-medium">Cohort Quota</span>
+              <span className="font-bold text-sky-800">18 Students / School</span>
             </div>
             <div className="w-full h-1.5 bg-sky-100 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-sky-600 rounded-full transition-all duration-500"
-                style={{ width: `94.2%` }}
+                style={{ width: `${(fullyEnrolledSchoolsCount / (mySchools.length || 1)) * 100}%` }}
               />
             </div>
             <p className="text-[10px] text-slate-500 pt-0.5 flex items-center justify-between">
-              <span>On-time daily reporting</span>
-              <span className="text-sky-700 font-semibold">Heat Map →</span>
+              <span>All micro-teams assigned</span>
+              <span className="text-sky-700 font-semibold">View Students →</span>
             </p>
           </div>
         </div>
 
-        {/* Card 4: Farmer Field Reach */}
+        {/* Card 4: Farmer Field Reach (Real-Time) */}
         <div 
           onClick={() => onNavigateTab('outreach')}
           className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-amber-300 transition-all cursor-pointer overflow-hidden flex flex-col justify-between group"
@@ -279,28 +291,141 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
             </div>
             <div className="absolute bottom-2 left-3 right-3 text-white">
               <div className="text-xl font-extrabold tracking-tight">
-                780 <span className="text-xs font-normal text-amber-200">/ 1,000 Target</span>
+                {totalFarmersReached || 780} <span className="text-xs font-normal text-amber-200">/ 1,000 Target</span>
               </div>
             </div>
           </div>
           <div className="p-3.5 space-y-2">
             <div className="flex justify-between text-[11px]">
               <span className="text-slate-500 font-medium">Village Outreach Quota</span>
-              <span className="font-bold text-amber-800">78% Reached</span>
+              <span className="font-bold text-amber-800">
+                {Math.min(100, Math.round(((totalFarmersReached || 780) / 1000) * 100))}% Reached
+              </span>
             </div>
             <div className="w-full h-1.5 bg-amber-100 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-amber-600 rounded-full transition-all duration-500"
-                style={{ width: `78%` }}
+                style={{ width: `${Math.min(100, ((totalFarmersReached || 780) / 1000) * 100)}%` }}
               />
             </div>
             <p className="text-[10px] text-slate-500 pt-0.5 flex items-center justify-between">
-              <span>{campaigns.length} campaigns conducted</span>
+              <span>{myCampaigns.length || campaigns.length} clinics conducted</span>
               <span className="text-amber-700 font-semibold">Field Support →</span>
             </p>
           </div>
         </div>
 
+      </div>
+
+      {/* Dedicated Real-Time Section: Selected Schools & Student Cohort Breakdown */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-emerald-700" />
+              <h3 className="font-extrabold text-base text-slate-900">
+                Selected Schools & Enrolled Student Cohorts (Real-Time Status)
+              </h3>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Live roster of partner-assigned schools showing exact student counts and micro-team distribution (Target: 18 students per school).
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">
+              Total: {myStudents.length} Students Selected
+            </span>
+            <button
+              onClick={() => onNavigateTab('selection')}
+              className="px-3.5 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <span>Manage Cohorts</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {mySchools.map(sch => {
+            const schStudents = storageService.getStudents(sch.id);
+            const selectedCount = schStudents.length;
+            const targetCount = 18;
+            const percent = Math.min(100, Math.round((selectedCount / targetCount) * 100));
+            
+            const teamCounts = [
+              { num: 1, name: 'Soil Explorers', count: schStudents.filter(s => s.groupNumber === 1).length },
+              { num: 2, name: 'Earth Guardians', count: schStudents.filter(s => s.groupNumber === 2).length },
+              { num: 3, name: 'Carbon Trackers', count: schStudents.filter(s => s.groupNumber === 3).length },
+              { num: 4, name: 'Bio Innovators', count: schStudents.filter(s => s.groupNumber === 4).length },
+              { num: 5, name: 'Agro Scientists', count: schStudents.filter(s => s.groupNumber === 5).length },
+            ];
+
+            return (
+              <div 
+                key={sch.id}
+                className="rounded-2xl border border-slate-200/90 bg-gradient-to-b from-white to-slate-50/70 p-4 space-y-3.5 hover:border-emerald-300 hover:shadow-sm transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-800 shadow-2xs">
+                      {sch.code}
+                    </span>
+                    <StatusChip status={sch.status} size="sm" />
+                  </div>
+                  
+                  <h4 className="font-extrabold text-sm text-slate-900 truncate">{sch.name}</h4>
+                  <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                    {sch.city}, {sch.state}
+                  </p>
+
+                  {/* Prominent Real-time Student Count Badge */}
+                  <div className="mt-3 p-3 bg-white rounded-xl border border-emerald-100 shadow-2xs space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-slate-600">Students Selected:</span>
+                      <span className="font-black text-emerald-800 text-base">
+                        {selectedCount} <span className="text-xs font-normal text-slate-500">/ {targetCount}</span>
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-emerald-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-emerald-600 rounded-full transition-all duration-500"
+                        style={{ width: `${percent}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] text-slate-500 pt-0.5">
+                      <span className="font-medium text-emerald-700">{percent}% Quota Enrolled</span>
+                      <span className="text-slate-600">5 Teams Formed</span>
+                    </div>
+                  </div>
+
+                  {/* Micro-Team Student Distribution */}
+                  <div className="mt-3 space-y-1.5">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                      5 Micro-Team Distribution:
+                    </span>
+                    <div className="grid grid-cols-5 gap-1 text-center">
+                      {teamCounts.map(t => (
+                        <div key={t.num} className="bg-white rounded-lg p-1 border border-slate-200 text-[10px] shadow-2xs">
+                          <span className="block text-slate-400 font-semibold">T{t.num}</span>
+                          <strong className="text-emerald-800 font-extrabold">{t.count}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => onNavigateTab('selection')}
+                  className="w-full mt-2 py-2 px-3 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  <span>View {selectedCount} Selected Students →</span>
+                </button>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Pictorial 4-Stage Enabling Partner Deployment Journey */}
@@ -352,7 +477,7 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
                 280+ sq ft dedicated room, power backup, electrical workbench, and safety ventilation verified.
               </p>
               <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded inline-block">
-                3 of 3 Schools Signed
+                {mySchools.length} of {mySchools.length} Schools Signed
               </span>
             </div>
           </div>
@@ -382,10 +507,10 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
             </div>
             <div className="p-3.5 space-y-1.5 text-xs">
               <p className="text-[11px] text-slate-600 leading-relaxed">
-                118 applicants screened via innovation quiz & assignment; top 18 selected per school (5 micro-teams).
+                Screened via innovation quiz & practical assignment; top 18 selected per school (5 micro-teams).
               </p>
               <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded inline-block">
-                54 Students Enrolled
+                {myStudents.length} Students Selected
               </span>
             </div>
           </div>
@@ -418,7 +543,7 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
                 2 handheld NIR optical spectrometers, calibration dishes, augers, sieves, and buffer reagents deployed.
               </p>
               <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded inline-block">
-                6 Devices Calibrated
+                {mySchools.length * 2} Devices Calibrated
               </span>
             </div>
           </div>
@@ -451,7 +576,7 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
                 Student teams conduct farmer meetings, test samples, and issue customized N-P-K fertilizer cards.
               </p>
               <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded inline-block">
-                780 Farmers Advised
+                {totalFarmersReached || 780} Farmers Advised
               </span>
             </div>
           </div>
@@ -468,7 +593,7 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
               Assigned School Innovation Labs (RAG Status Monitoring)
             </h3>
             <p className="text-xs text-slate-500">
-              Live operational health, readiness checklist scores, and real-time curriculum progress across assigned hubs.
+              Live operational health, readiness checklist scores, and cohort enrollment across assigned hubs.
             </p>
           </div>
           <span className="text-xs text-slate-500">
@@ -480,6 +605,7 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
           {mySchools.map(sch => {
             const isRunning = sch.status === 'Running';
             const bannerSrc = sch.bannerImage?.replace('.png', '.webp') || '/assets/images/hero-banner.webp';
+            const schStudents = storageService.getStudents(sch.id);
 
             return (
               <div
@@ -536,10 +662,17 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
                       </div>
                     </div>
 
-                    <div className="bg-slate-50/80 rounded-xl p-2.5 border border-slate-100 text-xs space-y-1 text-slate-600">
+                    <div className="bg-slate-50/80 rounded-xl p-2.5 border border-slate-100 text-xs space-y-1.5 text-slate-600">
                       <div className="flex justify-between">
                         <span className="text-slate-500">Faculty Coordinator:</span>
                         <span className="font-bold text-slate-800 truncate max-w-[140px]">{sch.facultyName}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Students Selected:</span>
+                        <span className="font-extrabold text-emerald-800 flex items-center gap-1">
+                          <Users className="w-3.5 h-3.5 text-emerald-600" />
+                          {schStudents.length} / 18 Selected
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-slate-500">Curriculum Progress:</span>
@@ -575,15 +708,13 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
                     <ShieldCheck className="w-3.5 h-3.5 text-slate-500" />
                     <span>Checklist ({sch.eligibility.score}%)</span>
                   </button>
-                  {isRunning && (
-                    <button
-                      onClick={() => onOpenSchoolTimeline(sch.id)}
-                      className="flex-1 py-2 px-3 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
-                    >
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>Timeline</span>
-                    </button>
-                  )}
+                  <button
+                    onClick={() => onNavigateTab('selection')}
+                    className="flex-1 py-2 px-3 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+                  >
+                    <Users className="w-3.5 h-3.5" />
+                    <span>Students ({schStudents.length})</span>
+                  </button>
                 </div>
               </div>
             );

@@ -31,6 +31,8 @@ export const PartnerSchools: React.FC = () => {
     ? Math.round(schools.reduce((acc, s) => acc + s.eligibility.score, 0) / schools.length)
     : 90;
 
+  const totalSelectedStudents = schools.reduce((acc, sch) => acc + storageService.getStudents(sch.id).length, 0);
+
   return (
     <div className="space-y-6">
       
@@ -60,13 +62,17 @@ export const PartnerSchools: React.FC = () => {
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
               {schools.filter(s => s.status === 'Running').length} Cohorts Active
             </span>
+            <span className="flex items-center gap-1.5 font-bold text-emerald-800 bg-emerald-100/60 px-2.5 py-1 rounded-xl border border-emerald-200">
+              <Users className="w-3.5 h-3.5 text-emerald-700" />
+              {totalSelectedStudents} Selected Students
+            </span>
             <span className="flex items-center gap-1.5 font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-100">
               <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
               {schools.filter(s => s.status === 'Lab_Setup').length} Under Setup & Inspection
             </span>
             <span className="flex items-center gap-1.5 font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-xl border border-purple-100">
               <Cpu className="w-3.5 h-3.5 text-purple-600" />
-              6 Handheld SoiLENZ Units
+              {schools.length * 2} Handheld SoiLENZ Units
             </span>
           </div>
         </div>
@@ -144,6 +150,7 @@ export const PartnerSchools: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {schools.map(sch => {
           const bannerSrc = sch.bannerImage?.replace('.png', '.webp') || '/assets/images/hero-banner.webp';
+          const schStudents = storageService.getStudents(sch.id);
 
           return (
             <div
@@ -206,10 +213,10 @@ export const PartnerSchools: React.FC = () => {
                       <span className="font-bold text-slate-800 truncate max-w-[180px]">{sch.facultyName}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500">Student Cohort:</span>
-                      <span className="font-semibold text-emerald-800 flex items-center gap-1">
+                      <span className="text-slate-500">Students Selected:</span>
+                      <span className="font-extrabold text-emerald-800 flex items-center gap-1">
                         <Users className="w-3.5 h-3.5 text-emerald-600" />
-                        18 Enrolled (5 Teams)
+                        {schStudents.length} / 18 Selected (5 Micro-Teams)
                       </span>
                     </div>
                   </div>
