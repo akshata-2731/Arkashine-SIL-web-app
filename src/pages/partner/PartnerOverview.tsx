@@ -416,7 +416,7 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
                 </div>
 
                 <button
-                  onClick={() => onNavigateTab('selection')}
+                  onClick={() => onNavigateTab(`selection?schoolId=${sch.id}`)}
                   className="w-full mt-2 py-2 px-3 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
                 >
                   <Users className="w-3.5 h-3.5" />
@@ -709,7 +709,7 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
                     <span>Checklist ({sch.eligibility.score}%)</span>
                   </button>
                   <button
-                    onClick={() => onNavigateTab('selection')}
+                    onClick={() => onNavigateTab(`selection?schoolId=${sch.id}`)}
                     className="flex-1 py-2 px-3 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
                   >
                     <Users className="w-3.5 h-3.5" />

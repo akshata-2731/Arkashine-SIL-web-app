@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Users, 
   Search, 
@@ -17,11 +18,27 @@ import { getInitialsAvatar } from '../../utils/avatarUtils';
 
 export const StudentSelection: React.FC = () => {
   const { activePartnerId } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlSchoolId = searchParams.get('schoolId');
+
   const allSchools = storageService.getSchools().filter(s => s.status === 'Running' || s.status === 'Lab_Setup');
   const partnerSchools = activePartnerId ? allSchools.filter(s => s.partnerId === activePartnerId) : allSchools;
   const schools = partnerSchools.length > 0 ? partnerSchools : allSchools;
 
-  const [selectedSchoolId, setSelectedSchoolId] = useState<string>(schools[0]?.id || 'SCH-01');
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string>(
+    urlSchoolId && schools.some(s => s.id === urlSchoolId) ? urlSchoolId : (schools[0]?.id || 'SCH-01')
+  );
+
+  useEffect(() => {
+    if (urlSchoolId && schools.some(s => s.id === urlSchoolId)) {
+      setSelectedSchoolId(urlSchoolId);
+    }
+  }, [urlSchoolId, schools]);
+
+  const handleSelectSchool = (schoolId: string) => {
+    setSelectedSchoolId(schoolId);
+    setSearchParams({ schoolId });
+  };
   const [selectedGroup, setSelectedGroup] = useState<number | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -140,7 +157,7 @@ export const StudentSelection: React.FC = () => {
             <span className="text-xs font-semibold text-slate-500">School:</span>
             <select
               value={selectedSchoolId}
-              onChange={(e) => setSelectedSchoolId(e.target.value)}
+              onChange={(e) => handleSelectSchool(e.target.value)}
               className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-emerald-600"
             >
               {schools.map(s => (
@@ -179,7 +196,7 @@ export const StudentSelection: React.FC = () => {
             return (
               <button
                 key={sch.id}
-                onClick={() => setSelectedSchoolId(sch.id)}
+                onClick={() => handleSelectSchool(sch.id)}
                 className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                   isSelected
                     ? 'bg-emerald-900 text-white border-emerald-800 shadow-md ring-2 ring-emerald-500'
