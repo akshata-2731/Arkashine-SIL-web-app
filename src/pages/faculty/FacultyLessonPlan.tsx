@@ -19,7 +19,7 @@ import {
   Send
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { storageService } from '../../services/storageService';
+import { storageService, useDailyLogs } from '../../services/storageService';
 import { CURRICULUM_MODULES } from '../../data/modulesData';
 import { DailyLog } from '../../types';
 
@@ -190,8 +190,11 @@ export const FacultyLessonPlan: React.FC = () => {
     setTimeout(() => setToastNotice(null), 4000);
   };
 
-  const existingLog = storageService.getDailyLog(school.id, selectedDay);
+  // Real-time hook for daily logs
+  const allLogs = useDailyLogs(school?.id);
+  const existingLog = allLogs.find(l => l.dayNumber === selectedDay);
   const isSubmitted = Boolean(existingLog?.submittedAt);
+  const isEndorsed = Boolean(existingLog?.principalRemarks && existingLog.principalRemarks.trim().length > 0);
   const isTheoryDay = selectedDay <= 5;
 
   return (
@@ -247,7 +250,11 @@ export const FacultyLessonPlan: React.FC = () => {
               <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                 Day {selectedDay}
               </h1>
-              {isSubmitted ? (
+              {isEndorsed ? (
+                <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1 shadow-sm">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Principal Endorsed ✓
+                </span>
+              ) : isSubmitted ? (
                 <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1 shadow-sm">
                   <Check className="w-3.5 h-3.5" /> Sent to Principal
                 </span>
@@ -257,6 +264,13 @@ export const FacultyLessonPlan: React.FC = () => {
                 </span>
               )}
             </div>
+
+            {isEndorsed && existingLog?.principalRemarks && (
+              <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-950/70 border border-emerald-600/60 text-emerald-200 text-xs shadow-sm">
+                <span className="font-bold text-emerald-300">Principal Endorsement:</span>
+                <span className="italic">"{existingLog.principalRemarks}"</span>
+              </div>
+            )}
 
             <p className="text-xs text-purple-200/80 mt-1 font-medium">
               {new Date().toLocaleDateString('en-IN', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}

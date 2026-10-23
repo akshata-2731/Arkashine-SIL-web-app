@@ -133,3 +133,12 @@ export class StorageCore {
 }
 
 export const storageCore = new StorageCore();
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
+    if (!e.key || Object.values(STORAGE_KEYS).includes(e.key as any)) {
+      storageCore.clearCache();
+      storageCore.notify();
+    }
+  });
+}

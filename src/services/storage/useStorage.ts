@@ -1,4 +1,4 @@
-import { useSyncExternalStore, useCallback } from 'react';
+import { useSyncExternalStore, useCallback, useRef } from 'react';
 import { storageCore } from './storageCore';
 import { storageService, StorageService } from '../storageService';
 import { 
@@ -13,14 +13,20 @@ storageCore.subscribe(() => {
 });
 
 export function useStorageSelector<T>(selector: (service: StorageService) => T): T {
+  const lastRef = useRef<{ version: number; value: T } | null>(null);
+
   const subscribe = useCallback((onStoreChange: () => void) => {
     return storageCore.subscribe(onStoreChange);
   }, []);
 
   const getSnapshot = useCallback(() => {
-    // Reference stateVersion to ensure re-evaluation when storage updates
-    void stateVersion;
-    return selector(storageService);
+    if (!lastRef.current || lastRef.current.version !== stateVersion) {
+      lastRef.current = {
+        version: stateVersion,
+        value: selector(storageService)
+      };
+    }
+    return lastRef.current.value;
   }, [selector]);
 
   return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);

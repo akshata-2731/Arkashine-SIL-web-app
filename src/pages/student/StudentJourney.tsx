@@ -19,7 +19,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { storageService } from '../../services/storageService';
+import { useStudents } from '../../services/storageService';
 import { SOIL_JOURNEY_STEPS, CURRICULUM_MODULES, JourneyStep, CurriculumModule } from '../../data/modulesData';
 import { CertificateModal } from '../../components/certificate/CertificateModal';
 import { ScientificSoilLab } from '../../components/interactive/ScientificSoilLab';
@@ -62,8 +62,9 @@ const fallbackStudent: Student = {
 
 export const StudentJourney: React.FC<StudentJourneyProps> = ({ initialTab, currentTab, onTabChange }) => {
   const { activeStudentId } = useAuth();
-  const allStudents = storageService.getStudents();
-  const student: Student = (activeStudentId ? storageService.getStudent(activeStudentId) : null) 
+  const allStudents = useStudents();
+
+  const student: Student = (activeStudentId ? allStudents.find(s => s.id === activeStudentId) : null) 
     || (allStudents && allStudents.length > 0 ? allStudents[0] : null) 
     || fallbackStudent;
     

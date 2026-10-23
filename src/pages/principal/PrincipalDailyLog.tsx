@@ -1,375 +1,369 @@
 import React, { useState } from 'react';
 import { 
-  ClipboardCheck, 
-  Clock, 
   FlaskConical, 
   Users, 
   MessageSquareQuote, 
-  Save,
-  CheckCircle2,
-  Sparkles,
-  BookOpen
+  CheckCircle2, 
+  MapPin, 
+  Camera, 
+  Receipt, 
+  Calendar, 
+  Check 
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { storageService } from '../../services/storageService';
+import { storageService, useDailyLogs } from '../../services/storageService';
 import { DailyLog } from '../../types';
-import { StatusChip } from '../../components/common/StatusChip';
-import { CURRICULUM_MODULES } from '../../data/modulesData';
 
 export const PrincipalDailyLog: React.FC = () => {
   const { activeSchoolId, currentUser } = useAuth();
   const school = storageService.getSchool(activeSchoolId) || storageService.getSchools()[0];
-  const [logs, setLogs] = useState<DailyLog[]>(
-    storageService.getDailyLogs(school.id)
-      .filter(l => l.dayNumber <= school.currentDay)
-      .sort((a, b) => b.dayNumber - a.dayNumber)
-  );
-  const [remarksState, setRemarksState] = useState<Record<string, string>>({});
+
+  // REAL-TIME hook: Automatically updates when Faculty submits in real time!
+  const allSchoolLogs = useDailyLogs(school?.id);
+  const logs = [...allSchoolLogs].sort((a, b) => b.dayNumber - a.dayNumber);
+
+  // Active / Selected Log for endorsement (defaults to latest log)
+  const [selectedDayNumber, setSelectedDayNumber] = useState<number | null>(null);
+  const activeLog = (selectedDayNumber !== null ? logs.find(l => l.dayNumber === selectedDayNumber) : logs[0]) || logs[0];
+
+  // Endorsement remark input state
+  const [remarkInput, setRemarkInput] = useState<string>('');
   const [savedNotice, setSavedNotice] = useState<string | null>(null);
 
-  const totalDeliveredHours = logs.reduce((acc, l) => acc + l.hoursTaught, 0);
-  const totalSamples = logs.reduce((acc, l) => acc + l.samplesTestedCount, 0);
-  const totalFarmers = logs.reduce((acc, l) => acc + l.farmersReachedCount, 0);
-  const endorsedLogsCount = logs.filter(l => Boolean(l.principalRemarks && l.principalRemarks.trim().length > 0)).length;
+  // Endorsement Presets for 1-click review
+  const ENDORSEMENT_PRESETS = [
+    '⭐ Excellent field testing & verified auger samples.',
+    '🧾 Test ticket proofs & SoiLENZ sensor readings verified.',
+    '🌾 Farmer consultation and fertilizer advice approved.',
+    '🧪 Chemical safety protocols observed by student teams.'
+  ];
 
-  const handleRemarkChange = (logId: string, val: string) => {
-    setRemarksState(prev => ({ ...prev, [logId]: val }));
+  const handleApplyPreset = (preset: string) => {
+    setRemarkInput(preset);
   };
 
-  const handleApplyPreset = (logId: string, preset: string) => {
-    setRemarksState(prev => ({ ...prev, [logId]: preset }));
-  };
+  const handleEndorseLog = (logToEndorse: DailyLog) => {
+    const remark = remarkInput.trim() || 'Officially reviewed and endorsed by Principal.';
 
-  const handleSaveRemark = (log: DailyLog) => {
-    const remark = remarksState[log.id] !== undefined ? remarksState[log.id] : (log.principalRemarks || '');
-    if (!remark.trim()) return;
+    const updatedLog: DailyLog = {
+      ...logToEndorse,
+      principalRemarks: remark,
+      status: 'On_Time'
+    };
 
-    log.principalRemarks = remark;
-    storageService.saveDailyLog(log, currentUser.name);
-    setLogs(prev => prev.map(l => l.id === log.id ? { ...l, principalRemarks: remark } : l));
+    storageService.saveDailyLog(updatedLog, currentUser?.name || 'Principal Dr. Sunita Deshmukh');
 
     storageService.addAuditLog({
       id: `AUD-${Date.now()}`,
       timestamp: new Date().toISOString(),
-      actorName: currentUser.name,
+      actorName: currentUser?.name || 'Principal Dr. Sunita Deshmukh',
       actorRole: 'principal',
       action: 'PRINCIPAL_REMARK_ADDED',
-      details: `Added principal endorsement to Day ${log.dayNumber} log: "${remark}"`,
+      details: `Officially endorsed Day ${logToEndorse.dayNumber} log: "${remark}"`,
       schoolId: school.id
     });
 
-    setSavedNotice(`Official endorsement saved for Day ${log.dayNumber}!`);
+    setSavedNotice(`✓ Day ${logToEndorse.dayNumber} officially signed and endorsed in real-time!`);
+    setRemarkInput('');
     setTimeout(() => setSavedNotice(null), 3500);
   };
 
-  const getModuleImage = (moduleNumber: number): string => {
-    const mod = CURRICULUM_MODULES.find(m => m.id === moduleNumber);
-    return mod?.image || '/assets/images/module-soil-testing.webp';
-  };
+  const totalDeliveredHours = logs.reduce((acc, l) => acc + (l.hoursTaught || 2.5), 0);
+  const totalSamples = logs.reduce((acc, l) => acc + (l.samplesTestedCount || 0), 0);
+  const totalFarmers = logs.reduce((acc, l) => acc + (l.farmersReachedCount || 0), 0);
+  const endorsedLogsCount = logs.filter(l => Boolean(l.principalRemarks && l.principalRemarks.trim().length > 0)).length;
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 pb-12">
       
-      {/* Header */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <ClipboardCheck className="w-5 h-5 text-emerald-700" />
-            <h2 className="text-xl font-bold text-slate-800 tracking-tight">
-              Faculty Daily Updates & Principal Endorsements
-            </h2>
-            <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
-              Day {school.currentDay} of 28 Active
-            </span>
-          </div>
-          <p className="text-xs text-slate-500">
-            Chronological laboratory timeline of classroom instructions and practical fieldwork submitted by <span className="font-semibold text-slate-700">{school.facultyName}</span>. Review session evidence and record principal observations.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 text-xs">
-          <div className="px-3 py-2 bg-emerald-50 rounded-xl border border-emerald-100 text-center min-w-[90px]">
-            <span className="text-base font-extrabold text-emerald-800 block">{endorsedLogsCount} / {logs.length}</span>
-            <span className="text-[10px] text-emerald-700 font-semibold">Endorsed</span>
-          </div>
-          <div className="px-3 py-2 bg-purple-50 rounded-xl border border-purple-100 text-center min-w-[90px]">
-            <span className="text-base font-extrabold text-purple-800 block">{totalDeliveredHours}h</span>
-            <span className="text-[10px] text-purple-700 font-semibold">Delivered</span>
-          </div>
-          <div className="px-3 py-2 bg-sky-50 rounded-xl border border-sky-100 text-center min-w-[85px]">
-            <span className="text-base font-extrabold text-sky-800 block">{totalSamples}</span>
-            <span className="text-[10px] text-sky-700 font-semibold">Tests Logged</span>
-          </div>
-          <div className="px-3 py-2 bg-amber-50 rounded-xl border border-amber-100 text-center min-w-[85px]">
-            <span className="text-base font-extrabold text-amber-800 block">{totalFarmers}</span>
-            <span className="text-[10px] text-amber-700 font-semibold">Farmers</span>
-          </div>
-        </div>
-      </div>
-
+      {/* Toast Alert */}
       {savedNotice && (
-        <div className="p-3.5 bg-emerald-100 border border-emerald-300 rounded-2xl text-xs font-semibold text-emerald-900 flex items-center gap-2 animate-in fade-in">
-          <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-2.5 px-4 py-3 bg-emerald-800 text-white text-xs font-bold rounded-2xl shadow-2xl border border-emerald-400 animate-in fade-in slide-in-from-top-3">
+          <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
           <span>{savedNotice}</span>
         </div>
       )}
 
-      {/* Pictorial Session Stages Gallery Banner */}
-      <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-2xs space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-emerald-700" />
-            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700">
-              Laboratory & Field Session Pictorial Representation
-            </h3>
-          </div>
-          <span className="text-[11px] text-slate-500">
-            Arkashine Practical Pedagogy
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="relative rounded-2xl overflow-hidden h-28 group bg-slate-900">
-            <img 
-              src="/assets/images/module-agri-science.webp" 
-              alt="Soil Science Theory" 
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-2.5">
-              <div>
-                <span className="text-[10px] font-bold text-emerald-300 block">Stage 1: Science</span>
-                <span className="text-xs font-bold text-white">Soil Horizons & Chemistry</span>
-              </div>
+      {/* 🌟 HEADER: SIMPLE & REAL-TIME */}
+      <div className="bg-gradient-to-r from-emerald-950 via-teal-950 to-slate-900 rounded-3xl p-6 text-white border border-emerald-800/40 shadow-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                Live Real-Time Sync
+              </span>
+              <span className="text-xs text-slate-300 font-medium">
+                Connected to Faculty {school.facultyName}
+              </span>
             </div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+              Principal Daily Log & Endorsements
+            </h1>
+            <p className="text-xs text-emerald-200/80">
+              Real-time feed of classroom instructions, farm visits, and verified test ticket receipts.
+            </p>
           </div>
 
-          <div className="relative rounded-2xl overflow-hidden h-28 group bg-slate-900">
-            <img 
-              src="/assets/images/module-sample-collection.webp" 
-              alt="Sample Collection" 
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-2.5">
-              <div>
-                <span className="text-[10px] font-bold text-emerald-300 block">Stage 2: Fieldwork</span>
-                <span className="text-xs font-bold text-white">GPS Auger Core Sampling</span>
-              </div>
+          {/* Key Metric Pills */}
+          <div className="flex items-center gap-2 text-center shrink-0">
+            <div className="px-3.5 py-2 bg-white/10 rounded-2xl border border-white/10 min-w-[80px]">
+              <span className="text-lg font-black text-white block">{endorsedLogsCount} / {logs.length}</span>
+              <span className="text-[10px] text-emerald-300 font-bold uppercase tracking-wider">Endorsed</span>
             </div>
-          </div>
-
-          <div className="relative rounded-2xl overflow-hidden h-28 group bg-slate-900">
-            <img 
-              src="/assets/images/module-soil-testing.webp" 
-              alt="SoiLENZ Testing" 
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-2.5">
-              <div>
-                <span className="text-[10px] font-bold text-amber-300 block">Stage 3: Lab Reagents</span>
-                <span className="text-xs font-bold text-white">SoiLENZ Handheld Testing</span>
-              </div>
+            <div className="px-3.5 py-2 bg-white/10 rounded-2xl border border-white/10 min-w-[75px]">
+              <span className="text-lg font-black text-white block">{totalDeliveredHours}h</span>
+              <span className="text-[10px] text-sky-300 font-bold uppercase tracking-wider">Hours</span>
             </div>
-          </div>
-
-          <div className="relative rounded-2xl overflow-hidden h-28 group bg-slate-900">
-            <img 
-              src="/assets/images/module-health-reports.webp" 
-              alt="Farmer Advisory" 
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-2.5">
-              <div>
-                <span className="text-[10px] font-bold text-sky-300 block">Stage 4: Community</span>
-                <span className="text-xs font-bold text-white">Farmer Health Advisories</span>
-              </div>
+            <div className="px-3.5 py-2 bg-white/10 rounded-2xl border border-white/10 min-w-[80px]">
+              <span className="text-lg font-black text-white block">{totalSamples}</span>
+              <span className="text-[10px] text-purple-300 font-bold uppercase tracking-wider">Tests Done</span>
+            </div>
+            <div className="px-3.5 py-2 bg-white/10 rounded-2xl border border-white/10 min-w-[80px]">
+              <span className="text-lg font-black text-white block">{totalFarmers}</span>
+              <span className="text-[10px] text-amber-300 font-bold uppercase tracking-wider">Farmers</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Timeline of Logs */}
-      <div className="space-y-4">
-        {logs.map(log => {
-          const currentRemark = remarksState[log.id] !== undefined ? remarksState[log.id] : (log.principalRemarks || '');
-          const isEndorsed = Boolean(log.principalRemarks && log.principalRemarks.trim().length > 0);
-          const fallbackImage = getModuleImage(log.moduleNumber);
-
-          return (
-            <div
-              key={log.id}
-              className={`bg-white rounded-3xl p-6 border shadow-xs hover:border-slate-300 transition-all space-y-4 ${
-                isEndorsed ? 'border-emerald-200/90 ring-1 ring-emerald-50' : 'border-slate-200/90'
-              }`}
-            >
-              {/* Log Header */}
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className="px-2.5 py-0.5 rounded-md bg-emerald-800 text-white font-bold text-xs">
-                      Day {log.dayNumber}
+      {/* 📋 HERO CARD: ACTIVE DAY TO ENDORSE */}
+      {activeLog ? (
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200/90 dark:border-slate-800 shadow-md space-y-6">
+          
+          {/* Top Bar of Active Log */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-3">
+              <span className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-black text-base flex items-center justify-center shadow-md shadow-emerald-500/20 shrink-0">
+                D{activeLog.dayNumber}
+              </span>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                    Day {activeLog.dayNumber}: {activeLog.moduleTitle || `Module ${activeLog.moduleNumber}`}
+                  </h2>
+                  {activeLog.principalRemarks ? (
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 flex items-center gap-1">
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      Officially Endorsed
                     </span>
-                    <span className="text-xs text-slate-500 font-medium">
-                      {new Date(log.date).toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                  ) : (
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 flex items-center gap-1 animate-pulse">
+                      Awaiting Your Endorsement
                     </span>
-                    <StatusChip status={log.status} size="sm" />
-                    {isEndorsed && (
-                      <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold flex items-center gap-1 border border-emerald-200">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                        Principal Endorsed
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="font-bold text-base text-slate-900 mt-1">
-                    {log.moduleTitle}
-                  </h3>
-                </div>
-
-                <div className="flex items-center gap-3 text-xs text-slate-600 bg-slate-50 px-3.5 py-2 rounded-2xl border border-slate-100 shrink-0 flex-wrap">
-                  <span className="flex items-center gap-1.5 font-bold text-purple-800">
-                    <Clock className="w-3.5 h-3.5 text-purple-600" />
-                    {log.hoursTaught} hrs taught
-                  </span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1.5 font-bold text-sky-800">
-                    <FlaskConical className="w-3.5 h-3.5 text-sky-600" />
-                    {log.samplesTestedCount} samples
-                  </span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1.5 font-bold text-amber-800">
-                    <Users className="w-3.5 h-3.5 text-amber-600" />
-                    {log.farmersReachedCount} farmers
-                  </span>
-                </div>
-              </div>
-
-              {/* Topics Covered & Pictorial Representation */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                
-                {/* Pictorial Session Evidence / Poster Preview */}
-                <div className="rounded-2xl overflow-hidden border border-slate-200 bg-slate-950 relative h-36 md:h-auto group">
-                  <img
-                    src={log.photos && log.photos.length > 0 ? log.photos[0] : fallbackImage}
-                    alt={log.moduleTitle}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-3">
-                    <span className="text-[11px] font-semibold text-white drop-shadow-xs">
-                      {log.photos && log.photos.length > 0 ? 'Verified Session Evidence' : 'Curriculum Lab Demonstration'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Topics List & Details */}
-                <div className="md:col-span-2 bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col justify-between space-y-3">
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-bold uppercase tracking-wider text-[10px] text-slate-500 flex items-center gap-1">
-                        <BookOpen className="w-3 h-3 text-slate-400" />
-                        Topics Taught & Practical Exercises:
-                      </span>
-                      <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
-                        Module {log.moduleNumber} Pedagogy
-                      </span>
-                    </div>
-                    <ul className="list-disc list-inside space-y-1 text-xs text-slate-700">
-                      {log.topicsCovered.map((t, idx) => (
-                        <li key={idx} className="leading-snug">{t}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {log.learningDescription && (
-                    <div className="p-2.5 rounded-xl bg-white border border-slate-200/80 text-[11px] text-slate-600 leading-relaxed">
-                      <span className="font-bold text-slate-700 block mb-0.5">Faculty Classroom Notes:</span>
-                      {log.learningDescription}
-                    </div>
                   )}
+                </div>
+                <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+                  <span className="flex items-center gap-1 font-semibold text-slate-600 dark:text-slate-300">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    {activeLog.date}
+                  </span>
+                  <span>•</span>
+                  <span>Submitted by {activeLog.facultyName || school.facultyName}</span>
+                </div>
+              </div>
+            </div>
 
-                  <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px] text-slate-500 flex-wrap gap-2">
-                    <span className="flex items-center gap-1 font-medium text-emerald-700">
-                      🧪 Chemical Safety Verified: Goggles & Reagents Signed
-                    </span>
-                    <span className="font-semibold text-slate-600">
-                      Submitted by {log.facultyName}
+            {/* Quick Numbers Badges */}
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/50 border border-purple-200 dark:border-purple-800 text-purple-900 dark:text-purple-300 text-xs font-black flex items-center gap-1.5">
+                <FlaskConical className="w-3.5 h-3.5 text-purple-600" />
+                {activeLog.samplesTestedCount || 0} Tests Done
+              </span>
+              <span className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-300 text-xs font-black flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-emerald-600" />
+                {activeLog.farmersReachedCount || 0} Farmers Met
+              </span>
+            </div>
+          </div>
+
+          {/* Topics Covered & Location */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+              <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span className="font-bold">Work Location:</span>
+              <span className="font-medium">{activeLog.incidentNotes?.split('|')[0] || 'School Lab & Community Field'}</span>
+            </div>
+
+            <div className="flex items-center gap-1.5 flex-wrap pt-1">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 mr-1">
+                Topics Covered:
+              </span>
+              {activeLog.topicsCovered && activeLog.topicsCovered.length > 0 ? (
+                activeLog.topicsCovered.map((topic, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold"
+                  >
+                    ✓ {topic}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-slate-400">Classroom Soil Science Theory</span>
+              )}
+            </div>
+          </div>
+
+          {/* 📸 PHOTOS OF TODAY (INCLUDING TEST TICKET RECEIPT) */}
+          <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <Camera className="w-4 h-4 text-emerald-600" />
+              Live Photo Proof from Faculty (Session & Printed Test Tickets 🧾)
+            </label>
+
+            {activeLog.photos && activeLog.photos.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
+                {activeLog.photos.map((photoUrl, idx) => (
+                  <div
+                    key={idx}
+                    className="relative h-36 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs group"
+                  >
+                    <img
+                      src={photoUrl}
+                      alt={`Day ${activeLog.dayNumber} photo ${idx + 1}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/assets/images/students-testing-soilenz-farm.png';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                    <span className="absolute bottom-2 left-2 text-[10px] font-bold text-white flex items-center gap-1">
+                      {idx === 0 ? <Camera className="w-3 h-3 text-emerald-400" /> : <Receipt className="w-3 h-3 text-purple-400" />}
+                      {idx === 0 ? 'Field Session' : idx === 1 ? 'Test Ticket Proof 🧾' : 'Farmer Advisory'}
                     </span>
                   </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-500">
+                No photos attached for this day.
+              </div>
+            )}
+          </div>
+
+          {/* ✍️ OFFICIAL PRINCIPAL ENDORSEMENT BOX */}
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+            {activeLog.principalRemarks ? (
+              /* Already Endorsed Banner */
+              <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-xs space-y-1">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span className="font-bold text-emerald-900 dark:text-emerald-200 text-sm">
+                    Officially Endorsed by Principal Dr. Sunita Deshmukh:
+                  </span>
+                </div>
+                <p className="text-emerald-800 dark:text-emerald-300 italic pl-6 font-medium">
+                  "{activeLog.principalRemarks}"
+                </p>
+              </div>
+            ) : (
+              /* Pending Endorsement Form */
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
+                    <MessageSquareQuote className="w-4 h-4 text-emerald-600" />
+                    Sign & Endorse Day {activeLog.dayNumber} Update
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-semibold">
+                    1-Click Presets:
+                  </span>
                 </div>
 
-              </div>
-
-              {/* Photo Strip if more than 1 photo */}
-              {log.photos && log.photos.length > 1 && (
-                <div className="flex items-center gap-3 overflow-x-auto pb-1">
-                  {log.photos.map((p, idx) => (
-                    <div key={idx} className="w-24 h-20 rounded-xl overflow-hidden border border-slate-200 shrink-0">
-                      <img src={p} alt={`Lab photo ${idx + 1}`} className="w-full h-full object-cover" />
-                    </div>
+                {/* Preset Chips */}
+                <div className="flex flex-wrap gap-1.5">
+                  {ENDORSEMENT_PRESETS.map((preset, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleApplyPreset(preset)}
+                      className="text-[11px] px-2.5 py-1 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-emerald-400 hover:text-emerald-700 cursor-pointer transition-all"
+                    >
+                      + {preset.split('.')[0]}
+                    </button>
                   ))}
                 </div>
-              )}
 
-              {/* Principal Remarks & Official Endorsement Box */}
-              <div className="pt-4 border-t border-slate-100 space-y-2">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                    <MessageSquareQuote className="w-4 h-4 text-emerald-700" />
-                    Principal Observation & Official Endorsement:
-                  </label>
-                  {isEndorsed && (
-                    <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-md border border-emerald-200 flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3 text-emerald-700" />
-                      Endorsed & Stamped for Arkashine Compliance
+                {/* Custom Remark Input */}
+                <input
+                  type="text"
+                  value={remarkInput}
+                  onChange={(e) => setRemarkInput(e.target.value)}
+                  placeholder="Enter endorsement remark or tap a preset above..."
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+
+                {/* 1-Click Endorse Button */}
+                <button
+                  type="button"
+                  onClick={() => handleEndorseLog(activeLog)}
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs shadow-md shadow-emerald-600/25 transition-all cursor-pointer active:scale-98 flex items-center justify-center gap-2"
+                >
+                  <Check className="w-4 h-4" />
+                  Sign & Endorse Day {activeLog.dayNumber} Update in Real-Time
+                </button>
+              </div>
+            )}
+          </div>
+
+        </div>
+      ) : (
+        <div className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 text-center space-y-2">
+          <p className="text-xs text-slate-500 font-bold">
+            No daily logs submitted yet.
+          </p>
+        </div>
+      )}
+
+      {/* 📅 CHRONOLOGICAL LOGS TIMELINE */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-xs space-y-3">
+        <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+          All Cohort Teaching Days ({logs.length} Days)
+        </h3>
+
+        <div className="space-y-2">
+          {logs.map(log => {
+            const isEndorsed = Boolean(log.principalRemarks && log.principalRemarks.trim().length > 0);
+            const isSelected = activeLog?.id === log.id;
+
+            return (
+              <div
+                key={log.id}
+                onClick={() => setSelectedDayNumber(log.dayNumber)}
+                className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                  isSelected
+                    ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 bg-slate-50/40 dark:bg-slate-800/40'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center justify-center">
+                    D{log.dayNumber}
+                  </span>
+                  <div>
+                    <span className="font-bold text-xs text-slate-900 dark:text-white block">
+                      {log.moduleTitle || `Module ${log.moduleNumber}`}
+                    </span>
+                    <span className="text-[10px] text-slate-400">
+                      {log.date} • {log.samplesTestedCount || 0} Tests • {log.farmersReachedCount || 0} Farmers
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {isEndorsed ? (
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                      ✓ Endorsed
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                      Pending
                     </span>
                   )}
                 </div>
-
-                {/* Quick Endorsement Preset Chips */}
-                <div className="flex items-center gap-1.5 flex-wrap text-[10px]">
-                  <span className="text-slate-400 font-semibold mr-1">Quick Endorsement:</span>
-                  <button
-                    type="button"
-                    onClick={() => handleApplyPreset(log.id, "Verified lab chemical safety protocols, PPE kits, and active student participation.")}
-                    className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-600 transition-colors border border-slate-200 cursor-pointer"
-                  >
-                    + Lab Safety & PPE Verified
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleApplyPreset(log.id, "High student attendance observed; excellent precision shown during SoiLENZ sample readings.")}
-                    className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-600 transition-colors border border-slate-200 cursor-pointer"
-                  >
-                    + Excellent Student Precision
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleApplyPreset(log.id, "Village farmer interaction completed smoothly. Advisory recommendations verified.")}
-                    className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-600 transition-colors border border-slate-200 cursor-pointer"
-                  >
-                    + Farmer Advisory Commended
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-2 pt-1">
-                  <input
-                    type="text"
-                    value={currentRemark}
-                    onChange={(e) => handleRemarkChange(log.id, e.target.value)}
-                    placeholder="Enter principal observation, PTA commendation, or safety audit endorsement..."
-                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-hidden focus:border-emerald-600"
-                  />
-                  <button
-                    onClick={() => handleSaveRemark(log)}
-                    className="px-4 py-2 bg-slate-900 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer shrink-0"
-                  >
-                    <Save className="w-3.5 h-3.5" />
-                    Save Endorsement
-                  </button>
-                </div>
               </div>
-
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
     </div>
