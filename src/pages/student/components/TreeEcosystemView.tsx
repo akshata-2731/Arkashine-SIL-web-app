@@ -123,7 +123,7 @@ export const TreeEcosystemView: React.FC<TreeEcosystemViewProps> = ({
             Explore, Test & Protect Our Earth
           </h3>
           <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
-            As a Student Soil Partner, you are learning what real agronomists and environmental scientists do. By using the handheld SoiLENZ scanner to measure pH, organic carbon, and nutrients, you help local farmers grow healthier crops while protecting our trees and water resources.
+            As a Young Scientist, you are learning what real agronomists and environmental scientists do. By using the handheld SoiLENZ scanner to measure pH, organic carbon, and nutrients, you help local farmers grow healthier crops while protecting our trees and water resources.
           </p>
           <div className="flex items-center gap-3 mt-4">
             <button

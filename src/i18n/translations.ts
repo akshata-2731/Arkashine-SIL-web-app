@@ -136,8 +136,8 @@ export const translations: Translations = {
     hi: 'बैज और पुरस्कार'
   },
   'nav.student_cert': {
-    en: 'Soil Partner Certificate',
-    hi: 'मृदा मित्र प्रमाण पत्र'
+    en: 'Young Scientist Certificate',
+    hi: 'यंग साइंटिस्ट प्रमाण पत्र'
   },
 
   // Faculty Daily Log Form

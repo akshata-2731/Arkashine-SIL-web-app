@@ -84,8 +84,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           { id: 'videos', label: 'Learning Videos', icon: Film, badge: '6 Vids' },
           { id: 'lab', label: 'Why Test Soil & pH', icon: Microscope },
           { id: 'modules', label: 'Study Modules (6)', icon: FlaskConical },
-          { id: 'quiz', label: 'Soil Doctor Quiz', icon: Award },
-          { id: 'certificate', label: 'Soil Partner Certificate', icon: FileCheck2 }
+          { id: 'quiz', label: 'Soil Quiz', icon: Award },
+          { id: 'certificate', label: 'Young Scientist Certificate', icon: FileCheck2 }
         ];
       default:
         return [];
@@ -235,3 +235,4 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </>
   );
 };
+

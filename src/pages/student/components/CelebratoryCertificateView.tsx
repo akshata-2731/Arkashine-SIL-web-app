@@ -42,10 +42,10 @@ export const CelebratoryCertificateView: React.FC<CelebratoryCertificateViewProp
 
   const handleShare = async () => {
     const shareData = {
-      title: `${student.name}'s Soil Partner Certificate`,
+      title: `${student.name}'s Young Scientist Certificate`,
       text: language === 'hi'
-        ? `मुझे अर्काशीन स्कूल इनोवेशन लैब से मृदा मित्र (Soil Partner) का प्रमाण पत्र प्राप्त हुआ है! 🌱🌟`
-        : `I have earned the official Soil Partner Certificate from the Arkashine School Innovation Lab! 🌱🌟`,
+        ? `मुझे अर्काशीन स्कूल इनोवेशन लैब से यंग साइंटिस्ट (Young Scientist) का प्रमाण पत्र प्राप्त हुआ है! 🌱🌟`
+        : `I have earned the official Young Scientist Certificate from the Arkashine School Innovation Lab! 🌱🌟`,
       url: window.location.href
     };
 
@@ -74,7 +74,7 @@ export const CelebratoryCertificateView: React.FC<CelebratoryCertificateViewProp
               {language === 'hi' ? 'आधिकारिक उपलब्धि' : 'Official Recognition'}
             </div>
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
-              {language === 'hi' ? 'मृदा मित्र सम्मान प्रमाण पत्र' : 'Soil Partner Honor Certificate'} 📜
+              {language === 'hi' ? 'यंग साइंटिस्ट सम्मान प्रमाण पत्र' : 'Young Scientist Certificate'} 📜
             </h2>
             <p className="text-sm sm:text-base text-emerald-100 max-w-xl font-medium">
               {language === 'hi'
@@ -164,7 +164,7 @@ export const CelebratoryCertificateView: React.FC<CelebratoryCertificateViewProp
               {language === 'hi' ? 'अर्काशीन स्कूल इनोवेशन लैब' : 'ARKASHINE SCHOOL INNOVATION LAB'}
             </div>
             <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
-              {language === 'hi' ? 'मृदा साथी प्रमाण पत्र' : 'CERTIFICATE OF ACHIEVEMENT'}
+              {language === 'hi' ? 'यंग साइंटिस्ट प्रमाण पत्र' : 'CERTIFICATE OF ACHIEVEMENT'}
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 font-semibold tracking-wide">
               {language === 'hi' ? 'राष्ट्रीय बाल मृदा विज्ञान संवर्धन कार्यक्रम' : 'National Soil Science Summer Programme (72 Hours)'}

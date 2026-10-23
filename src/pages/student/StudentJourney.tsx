@@ -181,7 +181,7 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({ initialTab, curr
             activeTab === 'quiz' ? 'btn-theme-primary shadow-xs font-bold' : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          🩺 Soil Doctor Quiz
+          🩺 Soil Quiz
         </button>
         <button
           onClick={() => setActiveTab('certificate')}
@@ -190,7 +190,7 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({ initialTab, curr
           }`}
         >
           <Award className="w-3.5 h-3.5 text-amber-400" />
-          Certificate
+          Young Scientist Certificate
         </button>
       </div>
 
@@ -528,14 +528,14 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({ initialTab, curr
               ))}
             </div>
 
-            {/* Action Banner to Proceed to Soil Doctor Quiz */}
+            {/* Action Banner to Proceed to Soil Quiz */}
             <div className="mt-8 p-5 rounded-2xl bg-gradient-to-r from-purple-50 via-slate-50 to-emerald-50 border border-purple-200 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <h4 className="font-extrabold text-sm text-slate-900">
                   Ready to Test Your Scientific Knowledge? 🩺
                 </h4>
                 <p className="text-xs text-slate-600 mt-0.5">
-                  Now that you have reviewed the study modules, take the Soil Doctor Quiz (≥80% required) to qualify for your certificate.
+                  Now that you have reviewed the study modules, take the Soil Quiz (≥80% required) to qualify for your Young Scientist Certificate.
                 </p>
               </div>
 
@@ -543,7 +543,7 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({ initialTab, curr
                 onClick={() => setActiveTab('quiz')}
                 className="px-6 py-3 rounded-xl btn-theme-primary font-bold text-xs shadow-xs transition-colors flex items-center gap-2 cursor-pointer shrink-0"
               >
-                <span>Proceed to Soil Doctor Quiz</span>
+                <span>Proceed to Soil Quiz</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -552,7 +552,7 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({ initialTab, curr
         </div>
       )}
 
-      {/* Tab 4: Soil Doctor Quiz (Placed strictly after study modules!) */}
+      {/* Tab 4: Soil Quiz (Placed strictly after study modules!) */}
       {activeTab === 'quiz' && (
         <div className="space-y-6">
           <SoilDoctorQuiz
@@ -565,7 +565,7 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({ initialTab, curr
         </div>
       )}
 
-      {/* Tab 5: Soil Partner Certificate (Last tab - Badges removed) */}
+      {/* Tab 5: Young Scientist Certificate (Last tab - Badges removed) */}
       {activeTab === 'certificate' && (
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xs text-center space-y-6">
           <div className="max-w-xl mx-auto space-y-4">
@@ -581,10 +581,10 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({ initialTab, curr
                   ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                   : 'bg-amber-50 text-amber-800 border-amber-200'
               }`}>
-                {isCertFullyUnlocked ? '🎉 100% Certified Soil Partner Qualification Met' : '🔒 Certificate Locked (Prerequisites Pending)'}
+                {isCertFullyUnlocked ? '🎉 100% Certified Young Scientist Qualification Met' : '🔒 Certificate Locked (Prerequisites Pending)'}
               </span>
               <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-                Soil Partner Completion Certificate
+                Young Scientist Certificate
               </h3>
               <p className="text-xs text-slate-500 mt-1">
                 Issued under the National Soil Innovation Mandate by Arkashine Innovations Pvt. Ltd.
@@ -631,7 +631,7 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({ initialTab, curr
                     {isQuizPassed ? `✓ Score: ${quizScore}% (≥80%)` : `Score: ${quizScore}% (<80%)`}
                   </span>
                 </div>
-                <h4 className="font-bold text-xs text-slate-900">Pass Soil Doctor Quiz</h4>
+                <h4 className="font-bold text-xs text-slate-900">Pass Soil Quiz</h4>
                 <p className="text-[11px] text-slate-600 mt-0.5">
                   Must score ≥80% (at least 4 of 5 correct).
                 </p>
@@ -812,7 +812,7 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({ initialTab, curr
                 }}
                 className="px-5 py-2 rounded-xl btn-theme-primary font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
               >
-                <span>Take Soil Doctor Quiz</span>
+                <span>Take Soil Quiz</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
