@@ -190,7 +190,7 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({ initialTab, curr
           }`}
         >
           <Award className="w-3.5 h-3.5 text-amber-400" />
-          Young Scientist Certificate
+          Young Soil Scientist Certificate
         </button>
       </div>
 
@@ -535,7 +535,7 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({ initialTab, curr
                   Ready to Test Your Scientific Knowledge? 🩺
                 </h4>
                 <p className="text-xs text-slate-600 mt-0.5">
-                  Now that you have reviewed the study modules, take the Soil Quiz (≥80% required) to qualify for your Young Scientist Certificate.
+                  Now that you have reviewed the study modules, take the Soil Quiz (≥80% required) to qualify for your Young Soil Scientist Certificate.
                 </p>
               </div>
 
@@ -565,7 +565,7 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({ initialTab, curr
         </div>
       )}
 
-      {/* Tab 5: Young Scientist Certificate (Last tab - Badges removed) */}
+      {/* Tab 5: Young Soil Scientist Certificate (Last tab - Badges removed) */}
       {activeTab === 'certificate' && (
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xs text-center space-y-6">
           <div className="max-w-xl mx-auto space-y-4">
@@ -581,10 +581,10 @@ export const StudentJourney: React.FC<StudentJourneyProps> = ({ initialTab, curr
                   ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                   : 'bg-amber-50 text-amber-800 border-amber-200'
               }`}>
-                {isCertFullyUnlocked ? '🎉 100% Certified Young Scientist Qualification Met' : '🔒 Certificate Locked (Prerequisites Pending)'}
+                {isCertFullyUnlocked ? '🎉 100% Certified Young Soil Scientist Qualification Met' : '🔒 Certificate Locked (Prerequisites Pending)'}
               </span>
               <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-                Young Scientist Certificate
+                Young Soil Scientist Certificate
               </h3>
               <p className="text-xs text-slate-500 mt-1">
                 Issued under the National Soil Innovation Mandate by Arkashine Innovations Pvt. Ltd.

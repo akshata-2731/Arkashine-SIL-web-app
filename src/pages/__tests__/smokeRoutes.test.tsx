@@ -39,7 +39,7 @@ describe('Role Home Views Smoke Tests', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/GreenHorizon AgriEd/i)).toBeInTheDocument();
+    expect(screen.getByText(/JKYOG/i)).toBeInTheDocument();
   });
 
   it('renders PrincipalOverview without crashing', () => {

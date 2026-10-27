@@ -21,7 +21,7 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
         </div>
 
         <h3 className="text-lg font-bold text-slate-900">
-          Young Scientist Certificate
+          Young Soil Scientist Certificate
         </h3>
         <p className="text-xs text-slate-500 mt-1">
           Issued under the National Soil Innovation Mandate by Arkashine Innovations Pvt. Ltd.

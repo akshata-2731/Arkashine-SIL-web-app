@@ -67,7 +67,7 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
             </span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-            Enabling Partner Executive Hub
+            JKYOG  Enabling Partner Executive Hub
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             Overseeing {mySchools.length} assigned school innovation lab hubs • {myStudents.length} student soil scientists selected • {mySchools.length * 5} micro-teams active
@@ -428,7 +428,7 @@ export const PartnerOverview: React.FC<PartnerOverviewProps> = ({
         </div>
       </div>
 
-      {/* Pictorial 4-Stage Enabling Partner Deployment Journey */}
+      {/* Pictorial 4-Stage JKYOG  Enabling Partner Deployment Journey */}
       <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-2xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div>

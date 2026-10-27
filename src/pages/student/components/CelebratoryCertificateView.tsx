@@ -42,10 +42,10 @@ export const CelebratoryCertificateView: React.FC<CelebratoryCertificateViewProp
 
   const handleShare = async () => {
     const shareData = {
-      title: `${student.name}'s Young Scientist Certificate`,
+      title: `${student.name}'s Young Soil Scientist Certificate`,
       text: language === 'hi'
-        ? `मुझे अर्काशीन स्कूल इनोवेशन लैब से यंग साइंटिस्ट (Young Scientist) का प्रमाण पत्र प्राप्त हुआ है! 🌱🌟`
-        : `I have earned the official Young Scientist Certificate from the Arkashine School Innovation Lab! 🌱🌟`,
+        ? `मुझे अर्काशीन स्कूल इनोवेशन लैब से यंग सॉइल साइंटिस्ट (Young Soil Scientist) का प्रमाण पत्र प्राप्त हुआ है! 🌱🌟`
+        : `I have earned the official Young Soil Scientist Certificate from the Arkashine School Innovation Lab! 🌱🌟`,
       url: window.location.href
     };
 
@@ -74,7 +74,7 @@ export const CelebratoryCertificateView: React.FC<CelebratoryCertificateViewProp
               {language === 'hi' ? 'आधिकारिक उपलब्धि' : 'Official Recognition'}
             </div>
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
-              {language === 'hi' ? 'यंग साइंटिस्ट सम्मान प्रमाण पत्र' : 'Young Scientist Certificate'} 📜
+              {language === 'hi' ? 'यंग साइंटिस्ट सम्मान प्रमाण पत्र' : 'Young Soil Scientist Certificate'} 📜
             </h2>
             <p className="text-sm sm:text-base text-emerald-100 max-w-xl font-medium">
               {language === 'hi'

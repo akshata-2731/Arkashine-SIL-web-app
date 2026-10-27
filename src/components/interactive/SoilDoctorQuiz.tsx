@@ -130,7 +130,7 @@ const QUIZ_QUESTIONS: QuizQuestion[] = [
   {
     id: 4,
     moduleTag: 'Module 4: Soil Chemistry & pH Lockout',
-    question: 'If a soil test reveals strongly acidic pH 5.2 with phosphorus lockout, what should the Young Scientist prescribe?',
+    question: 'If a soil test reveals strongly acidic pH 5.2 with phosphorus lockout, what should the Young Soil Scientist prescribe?',
     options: [
       { 
         id: 'a', 
@@ -275,13 +275,13 @@ export const SoilDoctorQuiz: React.FC<SoilDoctorQuizProps> = ({ onQuizPassed, on
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
         <div>
           <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full inline-block mb-1 bg-purple-50 text-[#5C26C0] border border-purple-200">
-            Young Scientist Qualification Check 🩺
+            Young Soil Scientist Qualification Check 🩺
           </span>
           <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
             Soil Quiz
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Test your scientific diagnosis skills across the 4 training modules. Score <strong className="text-[#5C26C0]">≥80% (4 of 5)</strong> to qualify for your Young Scientist Certificate!
+            Test your scientific diagnosis skills across the 4 training modules. Score <strong className="text-[#5C26C0]">≥80% (4 of 5)</strong> to qualify for your Young Soil Scientist Certificate!
           </p>
         </div>
 
@@ -438,7 +438,7 @@ export const SoilDoctorQuiz: React.FC<SoilDoctorQuizProps> = ({ onQuizPassed, on
                 </span>
               ) : (
                 <span>
-                  You answered <strong>{correctCount} of {totalQuestions} questions</strong> correctly ({scorePercent}%). The Arkashine National Standard requires <strong>at least 80% (4 of 5)</strong> to unlock your Young Scientist Certificate.
+                  You answered <strong>{correctCount} of {totalQuestions} questions</strong> correctly ({scorePercent}%). The Arkashine National Standard requires <strong>at least 80% (4 of 5)</strong> to unlock your Young Soil Scientist Certificate.
                 </span>
               )}
             </p>
@@ -477,7 +477,7 @@ export const SoilDoctorQuiz: React.FC<SoilDoctorQuizProps> = ({ onQuizPassed, on
                 className="w-full sm:w-auto px-6 py-2.5 rounded-xl btn-theme-primary font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Award className="w-4 h-4 text-amber-300" />
-                <span>Go to Young Scientist Certificate</span>
+                <span>Go to Young Soil Scientist Certificate</span>
               </button>
             )}
           </div>

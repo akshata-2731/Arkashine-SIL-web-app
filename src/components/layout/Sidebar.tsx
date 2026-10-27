@@ -85,7 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           { id: 'lab', label: 'Why Test Soil & pH', icon: Microscope },
           { id: 'modules', label: 'Study Modules (6)', icon: FlaskConical },
           { id: 'quiz', label: 'Soil Quiz', icon: Award },
-          { id: 'certificate', label: 'Young Scientist Certificate', icon: FileCheck2 }
+          { id: 'certificate', label: 'Young Soil Scientist Certificate', icon: FileCheck2 }
         ];
       default:
         return [];
@@ -96,7 +96,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const roleLabels: Record<Role, string> = {
     arkashine: t('role.arkashine', 'Arkashine HQ'),
-    partner: t('role.partner', 'Enabling Partner'),
+    partner: t('role.partner', 'JKYOG  Enabling Partner'),
     principal: t('role.principal', 'School Principal'),
     faculty: t('role.faculty', 'Faculty Coordinator'),
     student: t('role.student', 'Student Portal')

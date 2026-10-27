@@ -533,7 +533,7 @@ export const SoilDiagrams: React.FC<SoilDiagramsProps> = ({ language, onStartMod
             <p className="font-bold text-emerald-800">
               {language === 'hi'
                 ? 'SoiLENZ यंत्र से हम इसी जैविक शक्ति (Organic Carbon) को मापते हैं ताकि किसान भाई खुशहाल रहें!'
-                : 'With the SoiLENZ scanner, young scientists like you measure this very Organic Carbon power to guide farmers toward sustainable prosperity!'}
+                : 'With the SoiLENZ scanner, young soil scientists like you measure this very Organic Carbon power to guide farmers toward sustainable prosperity!'}
             </p>
           </div>
         )}

@@ -53,7 +53,7 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenMobileNav, pageTitle }) =>
 
   const roleList: { role: Role; label: string; org: string; icon: string }[] = [
     { role: 'arkashine', label: t('role.arkashine', 'Arkashine HQ'), org: 'Super Admin', icon: '🏛️' },
-    { role: 'partner', label: t('role.partner', 'Enabling Partner'), org: 'GreenHorizon AgriEd', icon: '🤝' },
+    { role: 'partner', label: t('role.partner', 'JKYOG  Enabling Partner'), org: 'JKYOG', icon: '🤝' },
     { role: 'principal', label: t('role.principal', 'School Principal'), org: "St. Xavier's Model", icon: '🏫' },
     { role: 'faculty', label: t('role.faculty', 'Faculty Coordinator'), org: 'Dr. Anjali Patil', icon: '🔬' },
     { role: 'student', label: t('role.student', 'Student Portal'), org: 'Ananya Sharma', icon: '🌱' }

@@ -26,7 +26,7 @@ export const translations: Translations = {
     hi: 'अर्काशीन मुख्यालय'
   },
   'role.partner': {
-    en: 'Enabling Partner',
+    en: 'JKYOG  Enabling Partner',
     hi: 'सहयोगी पार्टनर'
   },
   'role.principal': {
@@ -136,8 +136,8 @@ export const translations: Translations = {
     hi: 'बैज और पुरस्कार'
   },
   'nav.student_cert': {
-    en: 'Young Scientist Certificate',
-    hi: 'यंग साइंटिस्ट प्रमाण पत्र'
+    en: 'Young Soil Scientist Certificate',
+    hi: 'यंग सॉइल साइंटिस्ट प्रमाण पत्र'
   },
 
   // Faculty Daily Log Form

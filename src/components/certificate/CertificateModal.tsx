@@ -79,7 +79,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
               </div>
               <div>
                 <h3 id="cert-modal-title" className="text-base font-bold text-slate-900">
-                  Young Scientist Certificate
+                  Young Soil Scientist Certificate
                 </h3>
                 <p className="text-xs text-slate-500">
                   Student: {student.name} ({student.rollNo}) • {school?.name}
@@ -192,7 +192,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                     <span>School Innovation Lab</span>
                   </div>
                   <h1 className="text-2xl sm:text-3xl font-extrabold text-[#143D30] tracking-tight font-serif">
-                    YOUNG SCIENTIST CERTIFICATE
+                    YOUNG SOIL SCIENTIST CERTIFICATE
                   </h1>
                   <p className="text-xs uppercase tracking-wider text-amber-800 font-semibold">
                     Summer Innovation Program • 72 Hours Pedagogy & Fieldwork
